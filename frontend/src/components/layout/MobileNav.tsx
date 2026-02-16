@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLang } from '@/contexts/language-context';
 import { NavLink } from './NavLink';
 
 interface MobileNavProps {
@@ -7,13 +8,15 @@ interface MobileNavProps {
 }
 
 const links = [
-  { to: '/', label: 'Home' },
-  { to: '/candidates', label: 'Candidates' },
-  { to: '/parties', label: 'Parties' },
-  { to: '/geography', label: 'Geography' },
+  { to: '/', label: 'Home', labelNe: 'गृह' },
+  { to: '/candidates', label: 'Candidates', labelNe: 'उम्मेदवार' },
+  { to: '/parties', label: 'Parties', labelNe: 'दल' },
+  { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },
 ];
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
+  const { lang } = useLang();
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -46,7 +49,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
         <nav className="flex flex-col gap-1">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to} onClick={onClose}>
-              {link.label}
+              {lang === 'ne' ? link.labelNe : link.label}
             </NavLink>
           ))}
         </nav>

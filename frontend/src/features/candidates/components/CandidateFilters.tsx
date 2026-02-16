@@ -5,6 +5,7 @@ import { useApi } from '@/hooks/use-api';
 import { getProvinces } from '@/services/provinces';
 import { getProvince } from '@/services/provinces';
 import { getParties } from '@/services/parties';
+import { useLang } from '@/contexts/language-context';
 import type { CursorPage, Province, ProvinceDetail, Party } from '@/types/api';
 
 interface CandidateFiltersProps {
@@ -14,6 +15,9 @@ interface CandidateFiltersProps {
 }
 
 export function CandidateFilters({ filters, setFilter, clearFilters }: CandidateFiltersProps) {
+  const { lang } = useLang();
+  const isNe = lang === 'ne';
+
   const provinces = useApi<CursorPage<Province>>(
     (signal) => getProvinces(signal),
     [],
@@ -44,27 +48,27 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
     () =>
       (provinces.data?.results ?? []).map((p) => ({
         value: String(p.id),
-        label: p.name_ne,
+        label: isNe ? p.name_ne : p.name,
       })),
-    [provinces.data],
+    [provinces.data, isNe],
   );
 
   const districtOptions = useMemo(
     () =>
       (provinceDetail.data?.districts ?? []).map((d) => ({
         value: String(d.id),
-        label: d.name_ne,
+        label: isNe ? d.name_ne : d.name,
       })),
-    [provinceDetail.data],
+    [provinceDetail.data, isNe],
   );
 
   const partyOptions = useMemo(
     () =>
       (parties.data?.results ?? []).map((p) => ({
         value: String(p.id),
-        label: p.name_ne,
+        label: isNe ? p.name_ne : p.name,
       })),
-    [parties.data],
+    [parties.data, isNe],
   );
 
   const hasActiveFilters = Object.values(filters).some((v) => v !== undefined && v !== '');
@@ -73,59 +77,59 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Select
-          label="Province"
+          label={isNe ? 'प्रदेश' : 'Province'}
           options={provinceOptions}
-          placeholder="All Provinces"
+          placeholder={isNe ? 'सबै प्रदेश' : 'All Provinces'}
           value={filters.province ?? ''}
           onChange={(e) => setFilter('province', e.target.value || undefined)}
         />
         <Select
-          label="District"
+          label={isNe ? 'जिल्ला' : 'District'}
           options={districtOptions}
-          placeholder="All Districts"
+          placeholder={isNe ? 'सबै जिल्ला' : 'All Districts'}
           value={filters.district ?? ''}
           onChange={(e) => setFilter('district', e.target.value || undefined)}
           disabled={!selectedProvinceId}
         />
         <Select
-          label="Party"
+          label={isNe ? 'दल' : 'Party'}
           options={partyOptions}
-          placeholder="All Parties"
+          placeholder={isNe ? 'सबै दल' : 'All Parties'}
           value={filters.party ?? ''}
           onChange={(e) => setFilter('party', e.target.value || undefined)}
         />
         <Select
-          label="Gender"
+          label={isNe ? 'लिङ्ग' : 'Gender'}
           options={[
-            { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' },
-            { value: 'other', label: 'Other' },
+            { value: 'male', label: isNe ? 'पुरुष' : 'Male' },
+            { value: 'female', label: isNe ? 'महिला' : 'Female' },
+            { value: 'other', label: isNe ? 'अन्य' : 'Other' },
           ]}
-          placeholder="All Genders"
+          placeholder={isNe ? 'सबै लिङ्ग' : 'All Genders'}
           value={filters.gender ?? ''}
           onChange={(e) => setFilter('gender', e.target.value || undefined)}
         />
         <Select
-          label="Election Type"
+          label={isNe ? 'निर्वाचन प्रकार' : 'Election Type'}
           options={[
             { value: 'fptp', label: 'FPTP' },
             { value: 'pr', label: 'PR' },
           ]}
-          placeholder="All Types"
+          placeholder={isNe ? 'सबै प्रकार' : 'All Types'}
           value={filters.election_type ?? ''}
           onChange={(e) => setFilter('election_type', e.target.value || undefined)}
         />
         <Select
-          label="Order By"
+          label={isNe ? 'क्रमबद्ध' : 'Order By'}
           options={[
-            { value: '-votes_received', label: 'Most Votes' },
-            { value: 'votes_received', label: 'Least Votes' },
-            { value: 'name_ne', label: 'Name (A-Z)' },
-            { value: '-name_ne', label: 'Name (Z-A)' },
-            { value: 'age', label: 'Age (Young)' },
-            { value: '-age', label: 'Age (Old)' },
+            { value: '-votes_received', label: isNe ? 'बढी मत' : 'Most Votes' },
+            { value: 'votes_received', label: isNe ? 'कम मत' : 'Least Votes' },
+            { value: 'name_ne', label: isNe ? 'नाम (अ-ज्ञ)' : 'Name (A-Z)' },
+            { value: '-name_ne', label: isNe ? 'नाम (ज्ञ-अ)' : 'Name (Z-A)' },
+            { value: 'age', label: isNe ? 'उमेर (कम)' : 'Age (Young)' },
+            { value: '-age', label: isNe ? 'उमेर (बढी)' : 'Age (Old)' },
           ]}
-          placeholder="Default Order"
+          placeholder={isNe ? 'पूर्वनिर्धारित' : 'Default Order'}
           value={filters.ordering ?? ''}
           onChange={(e) => setFilter('ordering', e.target.value || undefined)}
         />
@@ -133,7 +137,7 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
       {hasActiveFilters && (
         <div>
           <Button variant="ghost" size="sm" onClick={clearFilters}>
-            Clear all filters
+            {isNe ? 'सबै फिल्टर हटाउनुहोस्' : 'Clear all filters'}
           </Button>
         </div>
       )}

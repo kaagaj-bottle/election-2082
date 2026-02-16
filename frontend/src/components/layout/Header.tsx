@@ -1,18 +1,21 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
+import { useLang } from '@/contexts/language-context';
 import { NavLink } from './NavLink';
 import { MobileNav } from './MobileNav';
 
 const links = [
-  { to: '/', label: 'Home' },
-  { to: '/candidates', label: 'Candidates' },
-  { to: '/parties', label: 'Parties' },
-  { to: '/geography', label: 'Geography' },
+  { to: '/', label: 'Home', labelNe: 'गृह' },
+  { to: '/candidates', label: 'Candidates', labelNe: 'उम्मेदवार' },
+  { to: '/parties', label: 'Parties', labelNe: 'दल' },
+  { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },
 ];
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { lang } = useLang();
 
   return (
     <header className="sticky top-0 z-30 border-b border-surface-200 bg-white/80 backdrop-blur dark:border-surface-700 dark:bg-surface-950/80">
@@ -26,12 +29,13 @@ export function Header() {
         <nav className="hidden items-center gap-1 md:flex">
           {links.map((link) => (
             <NavLink key={link.to} to={link.to}>
-              {link.label}
+              {lang === 'ne' ? link.labelNe : link.label}
             </NavLink>
           ))}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <LanguageToggle />
           <ThemeToggle />
           <button
             onClick={() => setMobileOpen(true)}

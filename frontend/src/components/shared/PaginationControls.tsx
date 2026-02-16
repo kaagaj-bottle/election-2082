@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button';
+import { useLang } from '@/contexts/language-context';
 
 interface PaginationControlsProps {
   hasPrevious: boolean;
@@ -15,6 +16,9 @@ export function PaginationControls({
   onNext,
   isLoading,
 }: PaginationControlsProps) {
+  const { lang } = useLang();
+  const isNe = lang === 'ne';
+
   if (!hasPrevious && !hasNext) return null;
 
   return (
@@ -25,7 +29,7 @@ export function PaginationControls({
         disabled={!hasPrevious || isLoading}
         isLoading={isLoading && hasPrevious}
       >
-        Previous
+        {isNe ? 'अघिल्लो' : 'Previous'}
       </Button>
       <Button
         variant="secondary"
@@ -33,7 +37,7 @@ export function PaginationControls({
         disabled={!hasNext || isLoading}
         isLoading={isLoading && hasNext}
       >
-        Next
+        {isNe ? 'अर्को' : 'Next'}
       </Button>
     </div>
   );

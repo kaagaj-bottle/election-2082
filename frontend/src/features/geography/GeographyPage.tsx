@@ -3,6 +3,7 @@ import { useApi } from '@/hooks/use-api';
 import { getProvinces } from '@/services/provinces';
 import { getProvince } from '@/services/provinces';
 import { getDistrict } from '@/services/districts';
+import { useLang } from '@/contexts/language-context';
 import type {
   CursorPage,
   Province,
@@ -17,6 +18,8 @@ import { DistrictList } from './components/DistrictList';
 import { ConstituencyList } from './components/ConstituencyList';
 
 export default function GeographyPage() {
+  const { lang } = useLang();
+  const isNe = lang === 'ne';
   const [selectedProvince, setSelectedProvince] = useState<Province | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<DistrictMinimal | null>(null);
 
@@ -47,12 +50,16 @@ export default function GeographyPage() {
     setSelectedDistrict(district);
   };
 
+  const nameOf = (obj: { name: string; name_ne: string }) => (isNe ? obj.name_ne : obj.name);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-nepali text-2xl font-bold text-ink-800 dark:text-ink-100">भूगोल</h1>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-          Explore provinces, districts, and constituencies
+          {isNe
+            ? 'प्रदेश, जिल्ला र निर्वाचन क्षेत्र हेर्नुहोस्'
+            : 'Explore provinces, districts, and constituencies'}
         </p>
       </div>
 
@@ -69,28 +76,30 @@ export default function GeographyPage() {
               : 'text-ink-500 hover:text-ink-700 dark:text-ink-400 dark:hover:text-ink-200'
           }`}
         >
-          Provinces
+          {isNe ? 'प्रदेश' : 'Provinces'}
         </button>
         {selectedProvince && (
           <>
             <span className="text-ink-400">/</span>
             <button
               onClick={() => setSelectedDistrict(null)}
-              className={`rounded px-2 py-1 font-nepali ${
+              className={`rounded px-2 py-1 ${isNe ? 'font-nepali' : ''} ${
                 !selectedDistrict
                   ? 'font-medium text-primary-600 dark:text-primary-400'
                   : 'text-ink-500 hover:text-ink-700 dark:text-ink-400 dark:hover:text-ink-200'
               }`}
             >
-              {selectedProvince.name_ne}
+              {nameOf(selectedProvince)}
             </button>
           </>
         )}
         {selectedDistrict && (
           <>
             <span className="text-ink-400">/</span>
-            <span className="rounded px-2 py-1 font-nepali font-medium text-primary-600 dark:text-primary-400">
-              {selectedDistrict.name_ne}
+            <span
+              className={`rounded px-2 py-1 font-medium text-primary-600 dark:text-primary-400 ${isNe ? 'font-nepali' : ''}`}
+            >
+              {nameOf(selectedDistrict)}
             </span>
           </>
         )}

@@ -5,10 +5,13 @@ import { SearchInput } from '@/components/shared/SearchInput';
 import { PaginationControls } from '@/components/shared/PaginationControls';
 import { CandidateFilters } from './components/CandidateFilters';
 import { CandidateList } from './components/CandidateList';
+import { useLang } from '@/contexts/language-context';
 import type { CandidateListItem } from '@/types/api';
 
 export default function CandidatesPage() {
   const { filters, setFilter, clearFilters } = useFilters();
+  const { lang } = useLang();
+  const isNe = lang === 'ne';
 
   const { items, isLoading, error, hasNext, hasPrevious, goNext, goPrevious } =
     useCursorPagination<CandidateListItem>(
@@ -24,14 +27,14 @@ export default function CandidatesPage() {
           उम्मेदवारहरू
         </h1>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-          Browse and search election candidates
+          {isNe ? 'निर्वाचन उम्मेदवारहरू खोज्नुहोस्' : 'Browse and search election candidates'}
         </p>
       </div>
 
       <SearchInput
         value={filters.search ?? ''}
         onChange={(value) => setFilter('search', value || undefined)}
-        placeholder="Search by name..."
+        placeholder={isNe ? 'नाम खोज्नुहोस्...' : 'Search by name...'}
       />
 
       <CandidateFilters filters={filters} setFilter={setFilter} clearFilters={clearFilters} />

@@ -1,4 +1,5 @@
 import { StatCard } from '@/components/ui/StatCard';
+import { useLang } from '@/contexts/language-context';
 
 interface StatsGridProps {
   provinceCount: number;
@@ -40,12 +41,15 @@ function FlagIcon() {
 }
 
 export function StatsGrid({ provinceCount, districtCount, constituencyCount, partyCount }: StatsGridProps) {
+  const { lang } = useLang();
+  const isNe = lang === 'ne';
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-      <StatCard label="Provinces" value={provinceCount} icon={<MapIcon />} />
-      <StatCard label="Districts" value={districtCount} icon={<BuildingIcon />} />
-      <StatCard label="Constituencies" value={constituencyCount} icon={<UsersIcon />} />
-      <StatCard label="Parties" value={partyCount} icon={<FlagIcon />} />
+      <StatCard label={isNe ? 'प्रदेश' : 'Provinces'} value={provinceCount} icon={<MapIcon />} />
+      <StatCard label={isNe ? 'जिल्ला' : 'Districts'} value={districtCount} icon={<BuildingIcon />} />
+      <StatCard label={isNe ? 'निर्वाचन क्षेत्र' : 'Constituencies'} value={constituencyCount} icon={<UsersIcon />} />
+      <StatCard label={isNe ? 'दल' : 'Parties'} value={partyCount} icon={<FlagIcon />} />
     </div>
   );
 }
