@@ -1,0 +1,14 @@
+{
+  "include": ["app", "manage.py"],
+  "typeCheckingMode": "strict",
+  "pythonVersion": "3.12",
+  "reportMissingTypeStubs": false,
+  "reportUnusedImport": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownMemberType": false,
+  "reportUnknownParameterType": false,
+  "reportUnknownArgumentType": false,
+  "reportIncompatibleVariableOverride": false,
+  "reportConstantRedefinition": false,
+  "reportCallIssue": false
+}
