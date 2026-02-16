@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  body {
+    @apply bg-surface-50 text-ink-800 dark:bg-surface-950 dark:text-ink-100;
+  }
+}
