@@ -26,20 +26,29 @@ class Candidate(models.Model):
     age = models.PositiveSmallIntegerField(null=True, blank=True)
     gender = models.CharField(max_length=6, choices=Gender.choices)
     father_name = models.CharField(max_length=300, blank=True)
+    father_name_en = models.CharField(max_length=300, blank=True)
     spouse_name = models.CharField(max_length=300, blank=True)
+    spouse_name_en = models.CharField(max_length=300, blank=True)
     address = models.TextField(blank=True)
+    address_en = models.TextField(blank=True)
     citizenship_district = models.CharField(max_length=100, blank=True)
+    citizenship_district_en = models.CharField(max_length=100, blank=True)
 
     # Education / Experience
     qualification = models.CharField(max_length=200, blank=True)
+    qualification_en = models.CharField(max_length=200, blank=True)
     institution = models.CharField(max_length=300, blank=True)
+    institution_en = models.CharField(max_length=300, blank=True)
     experience = models.TextField(blank=True)
+    experience_en = models.TextField(blank=True)
     other_details = models.TextField(blank=True)
+    other_details_en = models.TextField(blank=True)
 
     # Political
     party = models.ForeignKey("parties.Party", on_delete=models.CASCADE, related_name="candidates")
     election_symbol_code = models.PositiveIntegerField(null=True, blank=True)
     election_symbol_name = models.CharField(max_length=100, blank=True)
+    election_symbol_name_en = models.CharField(max_length=100, blank=True)
 
     # Geographic (FPTP)
     constituency = models.ForeignKey(
@@ -58,6 +67,7 @@ class Candidate(models.Model):
     closed_list_rank = models.PositiveSmallIntegerField(null=True, blank=True)
     voter_id = models.CharField(max_length=50, blank=True)
     inclusion_group = models.CharField(max_length=100, blank=True)
+    inclusion_group_en = models.CharField(max_length=100, blank=True)
     has_disability = models.BooleanField(default=False)
 
     # Media

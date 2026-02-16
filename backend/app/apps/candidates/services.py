@@ -8,6 +8,7 @@ from django.db import transaction
 from app.apps.candidates.models import Candidate, ElectionType, Gender
 from app.apps.elections.models import Constituency, District, Election, Province
 from app.apps.parties.models import Party
+from app.core.transliterate import transliterate
 
 GENDER_MAP: dict[str, str] = {
     "पुरुष": Gender.MALE,
@@ -59,7 +60,10 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
         if state_id not in province_cache:
             province_cache[state_id], _ = Province.objects.get_or_create(
                 source_id=state_id,
-                defaults={"name": row["StateName"], "name_ne": row["StateName"]},
+                defaults={
+                    "name": transliterate(row["StateName"]),
+                    "name_ne": row["StateName"],
+                },
             )
 
         district_name = row["DistrictName"]
@@ -67,7 +71,7 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
             district_cache[district_name], _ = District.objects.get_or_create(
                 province=province_cache[state_id],
                 name_ne=district_name,
-                defaults={"name": district_name},
+                defaults={"name": transliterate(district_name)},
             )
 
         const_number = int(row["ConstName"])
@@ -82,7 +86,7 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
         if party_name not in party_cache:
             party_cache[party_name], _ = Party.objects.get_or_create(
                 name_ne=party_name,
-                defaults={"name": ""},
+                defaults={"name": transliterate(party_name)},
             )
 
     # Second pass: create candidates in bulk
@@ -109,23 +113,43 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
             party_name = row["PoliticalPartyName"]
             gender_ne = row["Gender"]
 
+            father_name = _clean_text(row.get("FATHER_NAME"))
+            spouse_name = _clean_text(row.get("SPOUCE_NAME"))
+            address = _clean_text(row.get("ADDRESS"))
+            ctzdist = _clean_text(row.get("CTZDIST"))
+            qualification = _clean_text(row.get("QUALIFICATION"))
+            institution = _clean_text(row.get("NAMEOFINST"))
+            experience = _clean_text(row.get("EXPERIENCE"))
+            other_details = _clean_text(row.get("OTHERDETAILS"))
+            symbol_name = _clean_text(row.get("SymbolName"))
+
             candidate_data = {
                 "election": election,
                 "election_type": ElectionType.FPTP,
                 "name_ne": row["CandidateName"],
+                "name": transliterate(row["CandidateName"]),
                 "age": int(row["AGE_YR"]) if row["AGE_YR"] else None,
                 "gender": GENDER_MAP.get(gender_ne, Gender.OTHER),
-                "father_name": _clean_text(row.get("FATHER_NAME")),
-                "spouse_name": _clean_text(row.get("SPOUCE_NAME")),
-                "address": _clean_text(row.get("ADDRESS")),
-                "citizenship_district": _clean_text(row.get("CTZDIST")),
-                "qualification": _clean_text(row.get("QUALIFICATION")),
-                "institution": _clean_text(row.get("NAMEOFINST")),
-                "experience": _clean_text(row.get("EXPERIENCE")),
-                "other_details": _clean_text(row.get("OTHERDETAILS")),
+                "father_name": father_name,
+                "father_name_en": transliterate(father_name),
+                "spouse_name": spouse_name,
+                "spouse_name_en": transliterate(spouse_name),
+                "address": address,
+                "address_en": transliterate(address),
+                "citizenship_district": ctzdist,
+                "citizenship_district_en": transliterate(ctzdist),
+                "qualification": qualification,
+                "qualification_en": transliterate(qualification),
+                "institution": institution,
+                "institution_en": transliterate(institution),
+                "experience": experience,
+                "experience_en": transliterate(experience),
+                "other_details": other_details,
+                "other_details_en": transliterate(other_details),
                 "party": party_cache[party_name],
                 "election_symbol_code": int(row["SYMBOLCODE"]) if row.get("SYMBOLCODE") else None,
-                "election_symbol_name": _clean_text(row.get("SymbolName")),
+                "election_symbol_name": symbol_name,
+                "election_symbol_name_en": transliterate(symbol_name),
                 "constituency": constituency_cache[(district_name, const_number)],
                 "votes_received": int(row.get("TotalVoteReceived") or 0),
                 "status": _clean_text(row.get("E_STATUS")),

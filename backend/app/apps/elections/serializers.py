@@ -3,15 +3,24 @@ from __future__ import annotations
 from rest_framework import serializers
 
 from app.apps.elections.models import Constituency, District, Election, Province
+from app.core.bilingual import BilingualMixin
+
+_NAME_BILINGUAL = {
+    "name": {"ne": "name_ne", "en": "name"},
+}
 
 
-class ElectionListSerializer(serializers.ModelSerializer[Election]):
+class ElectionListSerializer(BilingualMixin, serializers.ModelSerializer[Election]):
+    bilingual_field_map = _NAME_BILINGUAL
+
     class Meta:
         model = Election
         fields = ["id", "name", "name_ne", "slug", "election_date", "is_active"]
 
 
-class ElectionDetailSerializer(serializers.ModelSerializer[Election]):
+class ElectionDetailSerializer(BilingualMixin, serializers.ModelSerializer[Election]):
+    bilingual_field_map = _NAME_BILINGUAL
+
     class Meta:
         model = Election
         fields = [
@@ -27,28 +36,34 @@ class ElectionDetailSerializer(serializers.ModelSerializer[Election]):
         ]
 
 
-class ProvinceSerializer(serializers.ModelSerializer[Province]):
+class ProvinceSerializer(BilingualMixin, serializers.ModelSerializer[Province]):
+    bilingual_field_map = _NAME_BILINGUAL
+
     class Meta:
         model = Province
         fields = ["id", "source_id", "name", "name_ne"]
 
 
-class DistrictMinimalSerializer(serializers.ModelSerializer[District]):
+class DistrictMinimalSerializer(BilingualMixin, serializers.ModelSerializer[District]):
+    bilingual_field_map = _NAME_BILINGUAL
+
     class Meta:
         model = District
         fields = ["id", "name", "name_ne"]
 
 
-class ProvinceDetailSerializer(serializers.ModelSerializer[Province]):
+class ProvinceDetailSerializer(BilingualMixin, serializers.ModelSerializer[Province]):
     districts = DistrictMinimalSerializer(many=True, read_only=True)
+    bilingual_field_map = _NAME_BILINGUAL
 
     class Meta:
         model = Province
         fields = ["id", "source_id", "name", "name_ne", "districts"]
 
 
-class DistrictSerializer(serializers.ModelSerializer[District]):
+class DistrictSerializer(BilingualMixin, serializers.ModelSerializer[District]):
     province = ProvinceSerializer(read_only=True)
+    bilingual_field_map = _NAME_BILINGUAL
 
     class Meta:
         model = District
@@ -61,9 +76,10 @@ class ConstituencyMinimalSerializer(serializers.ModelSerializer[Constituency]):
         fields = ["id", "number"]
 
 
-class DistrictDetailSerializer(serializers.ModelSerializer[District]):
+class DistrictDetailSerializer(BilingualMixin, serializers.ModelSerializer[District]):
     province = ProvinceSerializer(read_only=True)
     constituencies = ConstituencyMinimalSerializer(many=True, read_only=True)
+    bilingual_field_map = _NAME_BILINGUAL
 
     class Meta:
         model = District

@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     # Local apps
+    "app.core",
     "app.apps.elections",
     "app.apps.parties",
     "app.apps.candidates",

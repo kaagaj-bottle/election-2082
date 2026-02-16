@@ -4,16 +4,24 @@ from django.db.models import Count
 from rest_framework import serializers
 
 from app.apps.parties.models import Party
+from app.core.bilingual import BilingualMixin
+
+_NAME_BILINGUAL = {
+    "name": {"ne": "name_ne", "en": "name"},
+}
 
 
-class PartySerializer(serializers.ModelSerializer[Party]):
+class PartySerializer(BilingualMixin, serializers.ModelSerializer[Party]):
+    bilingual_field_map = _NAME_BILINGUAL
+
     class Meta:
         model = Party
         fields = ["id", "name_ne", "name"]
 
 
-class PartyDetailSerializer(serializers.ModelSerializer[Party]):
+class PartyDetailSerializer(BilingualMixin, serializers.ModelSerializer[Party]):
     candidate_count = serializers.IntegerField(read_only=True)
+    bilingual_field_map = _NAME_BILINGUAL
 
     class Meta:
         model = Party
