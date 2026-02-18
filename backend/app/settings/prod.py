@@ -19,6 +19,9 @@ DATABASES = {
         "PASSWORD": _db_url.password or "",
         "HOST": _db_url.hostname or "localhost",
         "PORT": str(_db_url.port or 5432),
+        "OPTIONS": {
+            "sslmode": "require",
+        },
     }
 }
 
@@ -26,6 +29,7 @@ DATABASES = {
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
 
 # Security
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = True
 SECURE_HSTS_SECONDS = 31536000
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -34,3 +38,11 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
+
+# Static files
+STATIC_ROOT = BASE_DIR / "staticfiles"  # noqa: F405
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}

@@ -24,6 +24,9 @@ Thumbs.db
 # uv
 uv.lock
 
+# Django collectstatic output
+backend/staticfiles/
+
 # Node (for future frontend)
 node_modules/
 .next/
