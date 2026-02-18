@@ -1,5 +1,6 @@
 import json
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ GENDER_MAP: dict[str, str] = {
 
 @dataclass
 class ImportResult:
+    election_created: bool
     provinces: int
     districts: int
     constituencies: int
@@ -47,7 +49,17 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
     with path.open(encoding="utf-8-sig") as f:
         data: list[dict[str, Any]] = json.load(f)
 
-    election = Election.objects.get(slug=election_slug)
+    election, election_created = Election.objects.get_or_create(
+        slug=election_slug,
+        defaults={
+            "name": "House of Representatives Election 2082",
+            "name_ne": "प्रतिनिधि सभा निर्वाचन २०८२",
+            "election_date": date(2026, 3, 5),
+            "total_seats_fptp": 165,
+            "total_seats_pr": 110,
+            "is_active": True,
+        },
+    )
 
     province_cache: dict[int, Province] = {}
     district_cache: dict[str, District] = {}
@@ -168,6 +180,7 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
             created_count = len(candidates_to_create)
 
     return ImportResult(
+        election_created=election_created,
         provinces=len(province_cache),
         districts=len(district_cache),
         constituencies=len(constituency_cache),

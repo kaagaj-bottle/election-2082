@@ -25,6 +25,9 @@ class Command(BaseCommand):
 
         result = import_fptp_from_json(file_path, election_slug)
 
+        if result.election_created:
+            self.stdout.write(f"  Created election '{election_slug}'")
+
         self.stdout.write(
             self.style.SUCCESS(
                 f"Import complete:\n"
