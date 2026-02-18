@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+.git/
+staticfiles/
+.ruff_cache/
+.mypy_cache/
+pyproject.toml
+uv.lock
