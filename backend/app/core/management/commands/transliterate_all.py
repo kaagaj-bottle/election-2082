@@ -35,6 +35,7 @@ DISTRICT_NAMES: dict[str, str] = {
     "संखुवासभा": "Sankhuwasabha",
     "सोलुखुम्बु": "Solukhumbu",
     "ओखलढुङ्गा": "Okhaldhunga",
+    "ओखलढुंगा": "Okhaldhunga",
     "खोटाङ": "Khotang",
     "उदयपुर": "Udayapur",
     # Madhesh Province
@@ -57,6 +58,7 @@ DISTRICT_NAMES: dict[str, str] = {
     "ललितपुर": "Lalitpur",
     "काठमाण्डौ": "Kathmandu",
     "काठमाडौँ": "Kathmandu",
+    "काठमाडौं": "Kathmandu",
     "नुवाकोट": "Nuwakot",
     "रसुवा": "Rasuwa",
     "धादिङ": "Dhading",
@@ -66,6 +68,7 @@ DISTRICT_NAMES: dict[str, str] = {
     "लमजुङ": "Lamjung",
     "तनहुँ": "Tanahun",
     "स्याङ्जा": "Syangja",
+    "स्याङजा": "Syangja",
     "कास्की": "Kaski",
     "मनाङ": "Manang",
     "मुस्ताङ": "Mustang",
@@ -75,7 +78,9 @@ DISTRICT_NAMES: dict[str, str] = {
     "नवलपरासी (बर्दघाट सुस्ता पूर्व)": "Nawalparasi East",
     # Lumbini Province
     "रुपन्देही": "Rupandehi",
+    "रूपन्देही": "Rupandehi",
     "कपिलवस्तु": "Kapilvastu",
+    "कपिलबस्तु": "Kapilvastu",
     "अर्घाखाँची": "Arghakhanchi",
     "गुल्मी": "Gulmi",
     "पाल्पा": "Palpa",
@@ -89,6 +94,7 @@ DISTRICT_NAMES: dict[str, str] = {
     # Karnali Province
     "रुकुम पश्चिम": "Rukum West",
     "रुकुम (पश्चिमी भाग)": "Rukum West",
+    "रुकुम (पश्चिम भाग)": "Rukum West",
     "सल्यान": "Salyan",
     "डोल्पा": "Dolpa",
     "हुम्ला": "Humla",
@@ -108,6 +114,78 @@ DISTRICT_NAMES: dict[str, str] = {
     "डडेलधुरा": "Dadeldhura",
     "बैतडी": "Baitadi",
     "दार्चुला": "Darchula",
+}
+
+# Official English names for all 66 parties, keyed by EC Nepali name.
+# Used as authoritative override for ekantipur scrape and transliteration fallback.
+PARTY_NAMES: dict[str, str] = {
+    "नेपाल कम्युनिष्ट पार्टी (एकीकृत मार्क्सवादी लेनिनवादी)": "CPN (Unified Marxist-Leninist)",
+    "नेपाली काँग्रेस": "Nepali Congress",
+    "नेपाली कम्युनिष्ट पार्टी": "Communist Party of Nepal",
+    "राष्ट्रिय स्वतन्त्र पार्टी": "Rastriya Swatantra Party",
+    "राष्ट्रिय प्रजातन्त्र पार्टी": "Rastriya Prajatantra Party",
+    "जनता समाजवादी पार्टी, नेपाल": "Janata Samajwadi Party, Nepal",
+    "नेपाल कम्युनिस्ट पार्टी (माओवादी)": "Communist Party of Nepal (Maoist)",
+    "राष्ट्रिय जनमोर्चा": "Rastriya Janamorcha",
+    "जनमत पार्टी": "Janamat Party",
+    "नागरिक उन्मुक्ति पार्टी, नेपाल(एकल चुनाव चिन्ह)": "Nagarik Unmukti Party, Nepal",
+    "राष्ट्रिय जनता पार्टी नेपाल": "Rastriya Janata Party Nepal",
+    "नेपाल मजदुर किसान पार्टी": "Nepal Majdoor Kisan Party",
+    "श्रम संस्कृति पार्टी": "Shram Sanskriti Party",
+    "राष्ट्रिय एकता दल": "Rastriya Ekta Dal",
+    "स्वतन्त्र": "Independent",
+    "लोकतान्त्रिक समाजवादी पार्टी, नेपाल": "Loktantrik Samajwadi Party, Nepal",
+    "संघीय लोकतान्त्रिक राष्ट्रिय मञ्च": "Sanghiya Loktantrik Rastriya Manch",
+    "नेपाल कम्युनिष्ट पार्टी (संयुक्त)": "CPN (United)",
+    "नेपाल कम्युनिष्ट पार्टी मार्क्सवादी (पुष्पलाल)": "CPN Marxist (Pushpalal)",
+    "नेपाल कम्युनिष्ट पार्टी (माक्र्सवादी)(एकल चुनाव चिन्ह)": "CPN (Marxist)",
+    "राष्ट्रिय उर्जाशील पार्टी, नेपाल": "Rastriya Urjashil Party, Nepal",
+    "राष्ट्रिय जनमत पार्टी": "Rastriya Janamat Party",
+    "राष्ट्रिय जनमुक्ति पार्टी": "Rastriya Janamukti Party",
+    "राष्ट्रिय परिवर्तन पार्टी": "Rastriya Pariwartan Party",
+    "राष्ट्रिय साझा पार्टी": "Rastriya Sajha Party",
+    "राष्ट्रिय मुक्ति आन्दोलन, नेपाल": "Rastriya Mukti Andolan, Nepal",
+    "राष्ट्रिय मुक्ति पार्टी नेपाल(एकल चुनाव चिन्ह)": "Rastriya Mukti Party Nepal",
+    " राष्ट्रिय नागरिक पार्टी": "Rastriya Nagarik Party",
+    "राष्ट्र निर्माण दल नेपाल": "Rastra Nirman Dal Nepal",
+    "नेपाल जनता पार्टी": "Nepal Janata Party",
+    "नेपाल जनता संरक्षण पार्टी": "Nepal Janata Sanrakshan Party",
+    "नेपाल जनमुक्ति पार्टी": "Nepal Janamukti Party",
+    "नेपाल जनसेवा पार्टी": "Nepal Janasewa Party",
+    "नेपाल मातृभूमि पार्टी": "Nepal Matribhumi Party",
+    "नेपाल मानवतावादी पार्टी": "Nepal Manavtawadi Party",
+    "नेपाल लोकतान्त्रिक पार्टी": "Nepal Loktantrik Party",
+    "नेपाल संघीय समाजवादी पार्टी(एकल चुनाव चिन्ह)": "Nepal Sanghiya Samajwadi Party",
+    "नेपाल सद्भावना पार्टी": "Nepal Sadbhawana Party",
+    "नेपालका लागि नेपाली पार्टी": "Nepalka Lagi Nepali Party",
+    "नेपाली जनता दल": "Nepali Janata Dal",
+    "नेपाली जनश्रमदान संस्कृति पार्टी": "Nepali Janashramdan Sanskriti Party",
+    "नेशनल रिपब्लिक नेपाल": "National Republic Nepal",
+    "पिपुल फर्ष्ट पार्टी": "People First Party",
+    "प्रगतिशील लोकतान्त्रिक पार्टी": "Pragatishil Loktantrik Party",
+    "प्रजातान्त्रिक पार्टी नेपाल": "Prajatantrik Party Nepal",
+    "आम जनता पार्टी(एकल चुनाव चिन्ह)": "Aam Janata Party",
+    "इतिहासिक जनता पार्टी": "Itihasik Janata Party",
+    "उज्यालो नेपाल पार्टी": "Ujyalo Nepal Party",
+    "गतिशील लोकतान्त्रिक पार्टी": "Gatishil Loktantrik Party",
+    "गान्धीवादी पार्टी नेपाल": "Gandhiwadi Party Nepal",
+    "जन अधिकार पार्टी": "Jan Adhikar Party",
+    "जनता लोकतान्त्रिक पार्टी, नेपाल": "Janata Loktantrik Party, Nepal",
+    "जनता समाजवादी पार्टी(एकल चुनाव चिन्ह)": "Janata Samajwadi Party",
+    "जनादेश पार्टी नेपाल(एकल चुनाव चिन्ह)": "Janadesh Party Nepal",
+    "जय मातृभूमि पार्टी": "Jai Matribhumi Party",
+    "त्रिमूल नेपाल": "Trimool Nepal",
+    "नागरिक सर्वोच्चता पार्टी नेपाल(एकल चुनाव चिन्ह)": "Nagarik Sarvochata Party Nepal",
+    "बहुजन एकता पार्टी नेपाल(एकल चुनाव चिन्ह)": "Bahujan Ekta Party Nepal",
+    "बहुजन शक्ति पार्टी": "Bahujan Shakti Party",
+    "मंगोल नेशनल अर्गनाइजेसन": "Mongol National Organisation",
+    "मितेरी पार्टी नेपाल": "Miteri Party Nepal",
+    "युनाईटेड नेपाल डिमोक्रयाटीक पार्टी": "United Nepal Democratic Party",
+    "संयुक्त नागरिक पार्टी": "Sanyukta Nagarik Party",
+    "समावेशी समाजवादी पार्टी": "Samabeshi Samajwadi Party",
+    "समावेशी समाजवादी पार्टी नेपाल": "Samabeshi Samajwadi Party Nepal",
+    "सार्वभौम नागरिक पार्टी": "Sarvabhaum Nagarik Party",
+    "स्वाभिमान पार्टी": "Swabhiman Party",
 }
 
 # Candidate fields that need _en counterparts
@@ -188,7 +266,9 @@ class Command(BaseCommand):
         for party in parties:
             if not force and party.name:
                 continue
-            party.name = transliterate(party.name_ne)
+            # Use hardcoded name first, fall back to transliteration
+            official = PARTY_NAMES.get(party.name_ne)
+            party.name = official if official else transliterate(party.name_ne)
             updated.append(party)
 
         if updated:

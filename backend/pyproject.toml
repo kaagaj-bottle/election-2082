@@ -20,6 +20,8 @@ dev = [
     "pyright>=1.1.390",
     "ruff>=0.8",
     "pre-commit>=4",
+    "requests>=2.32,<3",
+    "beautifulsoup4>=4.12,<5",
 ]
 
 [tool.ruff]
