@@ -1,12 +1,14 @@
 import { useEffect, useMemo } from 'react';
 import { Select } from '@/components/ui/Select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Button } from '@/components/ui/Button';
 import { useApi } from '@/hooks/use-api';
 import { getProvinces } from '@/services/provinces';
 import { getProvince } from '@/services/provinces';
+import { getDistrict } from '@/services/districts';
 import { getParties } from '@/services/parties';
 import { useLang } from '@/contexts/language-context';
-import type { CursorPage, Province, ProvinceDetail, Party } from '@/types/api';
+import type { CursorPage, Province, ProvinceDetail, DistrictDetail, Party } from '@/types/api';
 
 interface CandidateFiltersProps {
   filters: Record<string, string | undefined>;
@@ -32,17 +34,34 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
     [selectedProvinceId],
   );
 
+  const selectedDistrictId = filters.district;
+  const districtDetail = useApi<DistrictDetail | null>(
+    (signal) => {
+      if (!selectedDistrictId) return Promise.resolve(null);
+      return getDistrict(selectedDistrictId, signal);
+    },
+    [selectedDistrictId],
+  );
+
   const parties = useApi<CursorPage<Party>>(
     (signal) => getParties(signal),
     [],
   );
 
-  // Clear district when province changes
+  // Clear district + constituency when province changes
   useEffect(() => {
     if (!selectedProvinceId) {
       setFilter('district', undefined);
+      setFilter('constituency', undefined);
     }
   }, [selectedProvinceId, setFilter]);
+
+  // Clear constituency when district changes
+  useEffect(() => {
+    if (!selectedDistrictId) {
+      setFilter('constituency', undefined);
+    }
+  }, [selectedDistrictId, setFilter]);
 
   const provinceOptions = useMemo(
     () =>
@@ -62,6 +81,15 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
     [provinceDetail.data, isNe],
   );
 
+  const constituencyOptions = useMemo(
+    () =>
+      (districtDetail.data?.constituencies ?? []).map((c) => ({
+        value: String(c.id),
+        label: isNe ? `क्षेत्र ${c.number}` : `Constituency ${c.number}`,
+      })),
+    [districtDetail.data, isNe],
+  );
+
   const partyOptions = useMemo(
     () =>
       (parties.data?.results ?? []).map((p) => ({
@@ -75,7 +103,7 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         <Select
           label={isNe ? 'प्रदेश' : 'Province'}
           options={provinceOptions}
@@ -83,20 +111,28 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
           value={filters.province ?? ''}
           onChange={(e) => setFilter('province', e.target.value || undefined)}
         />
-        <Select
+        <SearchableSelect
           label={isNe ? 'जिल्ला' : 'District'}
           options={districtOptions}
           placeholder={isNe ? 'सबै जिल्ला' : 'All Districts'}
           value={filters.district ?? ''}
-          onChange={(e) => setFilter('district', e.target.value || undefined)}
+          onChange={(val) => setFilter('district', val || undefined)}
           disabled={!selectedProvinceId}
         />
         <Select
+          label={isNe ? 'निर्वाचन क्षेत्र' : 'Constituency'}
+          options={constituencyOptions}
+          placeholder={isNe ? 'सबै क्षेत्र' : 'All Constituencies'}
+          value={filters.constituency ?? ''}
+          onChange={(e) => setFilter('constituency', e.target.value || undefined)}
+          disabled={!selectedDistrictId}
+        />
+        <SearchableSelect
           label={isNe ? 'दल' : 'Party'}
           options={partyOptions}
           placeholder={isNe ? 'सबै दल' : 'All Parties'}
           value={filters.party ?? ''}
-          onChange={(e) => setFilter('party', e.target.value || undefined)}
+          onChange={(val) => setFilter('party', val || undefined)}
         />
         <Select
           label={isNe ? 'लिङ्ग' : 'Gender'}
@@ -119,6 +155,31 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
           value={filters.election_type ?? ''}
           onChange={(e) => setFilter('election_type', e.target.value || undefined)}
         />
+        <div>
+          <label className="mb-1 block text-sm font-medium text-ink-600 dark:text-ink-300">
+            {isNe ? 'उमेर' : 'Age Range'}
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min={0}
+              max={999}
+              placeholder={isNe ? 'न्यूनतम' : 'Min'}
+              value={filters.age_min ?? ''}
+              onChange={(e) => setFilter('age_min', e.target.value || undefined)}
+              className="w-full rounded border border-surface-300 bg-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500"
+            />
+            <input
+              type="number"
+              min={0}
+              max={999}
+              placeholder={isNe ? 'अधिकतम' : 'Max'}
+              value={filters.age_max ?? ''}
+              onChange={(e) => setFilter('age_max', e.target.value || undefined)}
+              className="w-full rounded border border-surface-300 bg-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500"
+            />
+          </div>
+        </div>
         <Select
           label={isNe ? 'क्रमबद्ध' : 'Order By'}
           options={[
