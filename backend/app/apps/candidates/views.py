@@ -46,11 +46,7 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
         overview["total_constituencies"] = qs.values("constituency").distinct().count()
 
         # --- Gender ---
-        gender_qs = (
-            qs.values("gender")
-            .annotate(count=Count("id"))
-            .order_by("-count")
-        )
+        gender_qs = qs.values("gender").annotate(count=Count("id")).order_by("-count")
         total = overview["total_candidates"]
         gender = [
             {

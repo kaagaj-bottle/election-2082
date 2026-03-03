@@ -14,9 +14,7 @@ class PartyViewSet(ReadOnlyModelViewSet[Party]):
             qs = qs.annotate(candidate_count=Count("candidates"))
         search = self.request.query_params.get("search", "").strip()
         if search:
-            qs = qs.filter(
-                Q(name_ne__icontains=search) | Q(name__icontains=search)
-            )
+            qs = qs.filter(Q(name_ne__icontains=search) | Q(name__icontains=search))
         return qs
 
     def get_serializer_class(self) -> type[PartySerializer | PartyDetailSerializer]:

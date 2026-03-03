@@ -9,7 +9,14 @@ from django.db import transaction
 from app.apps.candidates.models import Candidate, ElectionType, Gender
 from app.apps.elections.models import Constituency, District, Election, Province
 from app.apps.parties.models import Party
-from app.core.management.commands.transliterate_all import DISTRICT_NAMES, PROVINCE_NAMES
+from app.core.management.commands.transliterate_all import (
+    DISTRICT_NAMES,
+    INSTITUTION_NAMES,
+    PARTY_NAMES,
+    PROVINCE_NAMES,
+    QUALIFICATION_NAMES,
+    SYMBOL_NAMES,
+)
 from app.core.transliterate import transliterate
 
 GENDER_MAP: dict[str, str] = {
@@ -99,7 +106,7 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
         if party_name not in party_cache:
             party_cache[party_name], _ = Party.objects.get_or_create(
                 name_ne=party_name,
-                defaults={"name": transliterate(party_name)},
+                defaults={"name": PARTY_NAMES.get(party_name, transliterate(party_name))},
             )
 
     # Second pass: create candidates in bulk
@@ -166,11 +173,15 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
                 "spouse_name_en": transliterate(spouse_name),
                 "address_en": transliterate(address),
                 "citizenship_district_en": DISTRICT_NAMES.get(ctzdist, transliterate(ctzdist)),
-                "qualification_en": transliterate(qualification),
-                "institution_en": transliterate(institution),
+                "qualification_en": QUALIFICATION_NAMES.get(
+                    qualification, transliterate(qualification)
+                ),
+                "institution_en": INSTITUTION_NAMES.get(institution, transliterate(institution)),
                 "experience_en": transliterate(experience),
                 "other_details_en": transliterate(other_details),
-                "election_symbol_name_en": transliterate(symbol_name),
+                "election_symbol_name_en": SYMBOL_NAMES.get(
+                    symbol_name, transliterate(symbol_name)
+                ),
             }
 
             if source_id not in existing_source_ids:
