@@ -5,11 +5,11 @@ import re
 # Independent vowels (used at the start of a word or after another vowel)
 _VOWELS: dict[str, str] = {
     "अ": "a",
-    "आ": "aa",
+    "आ": "a",
     "इ": "i",
-    "ई": "ee",
+    "ई": "i",
     "उ": "u",
-    "ऊ": "oo",
+    "ऊ": "u",
     "ऋ": "ri",
     "ए": "e",
     "ऐ": "ai",
@@ -21,11 +21,11 @@ _VOWELS: dict[str, str] = {
 
 # Vowel matras (diacritics that replace the inherent 'a')
 _MATRAS: dict[str, str] = {
-    "\u093e": "aa",  # ा
+    "\u093e": "a",  # ा
     "\u093f": "i",  # ि
-    "\u0940": "ee",  # ी
+    "\u0940": "i",  # ी
     "\u0941": "u",  # ु
-    "\u0942": "oo",  # ू
+    "\u0942": "u",  # ू
     "\u0943": "ri",  # ृ
     "\u0947": "e",  # े
     "\u0948": "ai",  # ै
@@ -118,11 +118,19 @@ def _is_devanagari(text: str) -> bool:
     return bool(_DEVANAGARI_RE.search(text))
 
 
-def _transliterate_word(word: str) -> str:
-    """Transliterate a single Devanagari word to Roman script."""
+def _transliterate_word(word: str) -> tuple[str, bool, bool]:
+    """Transliterate a single Devanagari word to Roman script.
+
+    Returns (roman_text, ends_with_inherent_a, is_conjunct_ending):
+    - ends_with_inherent_a: True if the word ends with a consonant's inherent 'a'
+    - is_conjunct_ending: True if that final consonant follows a virama (conjunct)
+    """
     result: list[str] = []
     i = 0
     length = len(word)
+    ends_with_inherent_a = False
+    is_conjunct_ending = False
+    after_virama = False
 
     while i < length:
         char = word[i]
@@ -131,12 +139,16 @@ def _transliterate_word(word: str) -> str:
         if char in _DIGITS:
             result.append(_DIGITS[char])
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Punctuation
         if char in _PUNCTUATION:
             result.append(_PUNCTUATION[char])
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Check for two-character conjuncts (क्ष, त्र, ज्ञ) before single consonants
@@ -147,12 +159,20 @@ def _transliterate_word(word: str) -> str:
             if i < length and word[i] == _VIRAMA:
                 result.append(consonant[:-1])
                 i += 1
+                after_virama = True
+                ends_with_inherent_a = False
             # Check if followed by a matra (replace inherent 'a')
             elif i < length and word[i] in _MATRAS:
                 result.append(consonant[:-1] + _MATRAS[word[i]])
                 i += 1
+                after_virama = False
+                ends_with_inherent_a = False
             else:
                 result.append(consonant)
+                # These 3-char sequences are inherently conjuncts (contain virama)
+                is_conjunct_ending = True
+                ends_with_inherent_a = True
+                after_virama = False
             continue
 
         # Nukta consonants (base + nukta combining char)
@@ -162,11 +182,18 @@ def _transliterate_word(word: str) -> str:
             if i < length and word[i] == _VIRAMA:
                 result.append(consonant[:-1])
                 i += 1
+                after_virama = True
+                ends_with_inherent_a = False
             elif i < length and word[i] in _MATRAS:
                 result.append(consonant[:-1] + _MATRAS[word[i]])
                 i += 1
+                after_virama = False
+                ends_with_inherent_a = False
             else:
                 result.append(consonant)
+                is_conjunct_ending = after_virama
+                ends_with_inherent_a = True
+                after_virama = False
             continue
 
         # Regular consonant
@@ -177,66 +204,87 @@ def _transliterate_word(word: str) -> str:
             if i < length and word[i] == _VIRAMA:
                 result.append(consonant[:-1])
                 i += 1
+                after_virama = True
+                ends_with_inherent_a = False
             # Matra: replace inherent 'a' with the matra vowel
             elif i < length and word[i] in _MATRAS:
                 result.append(consonant[:-1] + _MATRAS[word[i]])
                 i += 1
+                after_virama = False
+                ends_with_inherent_a = False
             else:
                 result.append(consonant)
+                is_conjunct_ending = after_virama
+                ends_with_inherent_a = True
+                after_virama = False
             continue
 
         # Independent vowels
         if char in _VOWELS:
             result.append(_VOWELS[char])
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Anusvara
         if char == _ANUSVARA:
             result.append("n")
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Chandrabindu
         if char == _CHANDRABINDU:
             result.append("n")
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Visarga
         if char == _VISARGA:
             result.append("h")
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Stray matra (shouldn't happen, but handle gracefully)
         if char in _MATRAS:
             result.append(_MATRAS[char])
             i += 1
+            ends_with_inherent_a = False
+            after_virama = False
             continue
 
         # Virama by itself
         if char == _VIRAMA:
             i += 1
+            after_virama = True
             continue
 
         # Pass through any other character
         result.append(char)
         i += 1
+        ends_with_inherent_a = False
+        after_virama = False
 
-    return "".join(result)
+    return "".join(result), ends_with_inherent_a, is_conjunct_ending
 
 
-def _apply_schwa_deletion(roman: str) -> str:
+def _apply_schwa_deletion(roman: str, ends_with_inherent_a: bool, is_conjunct_ending: bool) -> str:
     """Apply Nepali schwa deletion: drop word-final inherent 'a'.
 
-    In Nepali, the inherent 'a' at the end of a word is typically silent.
-    e.g., 'rama' → 'ram', 'kathamandu' → 'kathmandu'
-    But don't delete after single-char syllables or if the word is just 'a'.
+    Only deletes the final 'a' when:
+    - It comes from a consonant's inherent 'a' (not from a matra like ा)
+    - The consonant is NOT the last in a conjunct cluster (e.g. न्द्र)
+      because stripping 'a' from conjuncts produces unpronounceable results.
     """
     if len(roman) <= 1:
         return roman
-    if roman.endswith("a") and not roman.endswith("aa"):
+    if ends_with_inherent_a and not is_conjunct_ending:
         return roman[:-1]
     return roman
 
@@ -266,8 +314,8 @@ def transliterate(text: str) -> str:
             parts.append(text[last_end:start])
 
         dev_segment = match.group()
-        roman = _transliterate_word(dev_segment)
-        roman = _apply_schwa_deletion(roman)
+        roman, ends_with_inherent_a, is_conjunct_ending = _transliterate_word(dev_segment)
+        roman = _apply_schwa_deletion(roman, ends_with_inherent_a, is_conjunct_ending)
         parts.append(roman)
 
         last_end = end
