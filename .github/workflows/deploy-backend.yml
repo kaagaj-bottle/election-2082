@@ -19,6 +19,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd ${{ secrets.PROJECT_DIR }}
+            git remote set-url origin git@github.com:kaagaj-bottle/election-2082.git
             git pull origin main
             docker compose up --build -d web
             docker compose exec web python manage.py migrate
