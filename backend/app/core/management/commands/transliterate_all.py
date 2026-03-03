@@ -296,7 +296,11 @@ class Command(BaseCommand):
                     continue
                 ne_value = getattr(candidate, ne_field)
                 if ne_value:
-                    setattr(candidate, en_field, transliterate(ne_value))
+                    if en_field == "citizenship_district_en":
+                        en_value = DISTRICT_NAMES.get(ne_value, transliterate(ne_value))
+                        setattr(candidate, en_field, en_value)
+                    else:
+                        setattr(candidate, en_field, transliterate(ne_value))
                     changed = True
 
             if changed:

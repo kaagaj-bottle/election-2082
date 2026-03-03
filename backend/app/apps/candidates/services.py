@@ -9,7 +9,7 @@ from django.db import transaction
 from app.apps.candidates.models import Candidate, ElectionType, Gender
 from app.apps.elections.models import Constituency, District, Election, Province
 from app.apps.parties.models import Party
-from app.core.management.commands.transliterate_all import DISTRICT_NAMES
+from app.core.management.commands.transliterate_all import DISTRICT_NAMES, PROVINCE_NAMES
 from app.core.transliterate import transliterate
 
 GENDER_MAP: dict[str, str] = {
@@ -74,7 +74,7 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
             province_cache[state_id], _ = Province.objects.get_or_create(
                 source_id=state_id,
                 defaults={
-                    "name": transliterate(row["StateName"]),
+                    "name": PROVINCE_NAMES.get(state_id, transliterate(row["StateName"])),
                     "name_ne": row["StateName"],
                 },
             )
@@ -165,7 +165,7 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
                 "father_name_en": transliterate(father_name),
                 "spouse_name_en": transliterate(spouse_name),
                 "address_en": transliterate(address),
-                "citizenship_district_en": transliterate(ctzdist),
+                "citizenship_district_en": DISTRICT_NAMES.get(ctzdist, transliterate(ctzdist)),
                 "qualification_en": transliterate(qualification),
                 "institution_en": transliterate(institution),
                 "experience_en": transliterate(experience),
