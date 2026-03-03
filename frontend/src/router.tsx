@@ -9,6 +9,7 @@ const CandidateDetailPage = lazy(() => import('@/features/candidates/CandidateDe
 const PartiesPage = lazy(() => import('@/features/parties/PartiesPage'));
 const GeographyPage = lazy(() => import('@/features/geography/GeographyPage'));
 const StatsPage = lazy(() => import('@/features/stats/StatsPage'));
+const GuidelinesPage = lazy(() => import('@/features/guidelines/GuidelinesPage'));
 
 function PageLoader() {
   return (
@@ -71,6 +72,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <StatsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: '/guidelines',
+        element: (
+          <SuspenseWrapper>
+            <GuidelinesPage />
           </SuspenseWrapper>
         ),
       },

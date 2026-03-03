@@ -12,6 +12,7 @@ const links = [
   { to: '/parties', label: 'Parties', labelNe: 'दल' },
   { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },
   { to: '/stats', label: 'Stats', labelNe: 'तथ्याङ्क' },
+  { to: '/guidelines', label: 'Guidelines', labelNe: 'निर्देशिका' },
 ];
 
 export function Header() {
