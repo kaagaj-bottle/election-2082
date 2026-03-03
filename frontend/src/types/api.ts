@@ -17,6 +17,7 @@ export interface ElectionListItem {
 export interface ElectionDetail extends ElectionListItem {
   total_seats_fptp: number;
   total_seats_pr: number;
+  total_districts: number;
   created_at: string;
 }
 
@@ -87,6 +88,58 @@ export interface CandidateListItem {
   constituency: Constituency | null;
   votes_received: number;
   photo_url: string | null;
+}
+
+// Stats
+export interface GenderStat {
+  gender: Gender;
+  count: number;
+  percentage: number;
+}
+
+export interface AgeBucket {
+  bucket: string;
+  count: number;
+}
+
+export interface AgeStats {
+  avg_age: number | null;
+  min_age: number | null;
+  max_age: number | null;
+  buckets: AgeBucket[];
+}
+
+export interface PartyStat {
+  party__id: number;
+  party__name_ne: string;
+  party__name: string;
+  candidate_count?: number;
+}
+
+export interface ProvinceStat {
+  id: number;
+  name: string;
+  name_ne: string;
+  candidate_count: number;
+}
+
+export interface CandidatesPerConstituency {
+  avg: number | null;
+  min: number | null;
+  max: number | null;
+}
+
+export interface ElectionStats {
+  overview: {
+    total_candidates: number;
+    total_parties: number;
+    total_constituencies: number;
+  };
+  gender: GenderStat[];
+  age: AgeStats;
+  party_by_candidates: PartyStat[];
+  provinces: ProvinceStat[];
+  candidates_per_constituency: CandidatesPerConstituency;
 }
 
 export interface CandidateDetail {

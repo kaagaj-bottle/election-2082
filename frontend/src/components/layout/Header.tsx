@@ -11,6 +11,7 @@ const links = [
   { to: '/candidates', label: 'Candidates', labelNe: 'उम्मेदवार' },
   { to: '/parties', label: 'Parties', labelNe: 'दल' },
   { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },
+  { to: '/stats', label: 'Stats', labelNe: 'तथ्याङ्क' },
 ];
 
 export function Header() {

@@ -20,6 +20,7 @@ class ElectionListSerializer(BilingualMixin, serializers.ModelSerializer[Electio
 
 class ElectionDetailSerializer(BilingualMixin, serializers.ModelSerializer[Election]):
     bilingual_field_map = _NAME_BILINGUAL
+    total_districts = serializers.SerializerMethodField()
 
     class Meta:
         model = Election
@@ -31,9 +32,13 @@ class ElectionDetailSerializer(BilingualMixin, serializers.ModelSerializer[Elect
             "election_date",
             "total_seats_fptp",
             "total_seats_pr",
+            "total_districts",
             "is_active",
             "created_at",
         ]
+
+    def get_total_districts(self, obj: Election) -> int:
+        return District.objects.count()
 
 
 class ProvinceSerializer(BilingualMixin, serializers.ModelSerializer[Province]):

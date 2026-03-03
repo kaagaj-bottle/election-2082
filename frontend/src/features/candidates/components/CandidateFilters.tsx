@@ -44,7 +44,7 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
   );
 
   const parties = useApi<CursorPage<Party>>(
-    (signal) => getParties(signal),
+    (signal) => getParties(undefined, signal),
     [],
   );
 

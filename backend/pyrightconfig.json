@@ -10,5 +10,6 @@
   "reportUnknownArgumentType": false,
   "reportIncompatibleVariableOverride": false,
   "reportConstantRedefinition": false,
-  "reportCallIssue": false
+  "reportCallIssue": false,
+  "reportAttributeAccessIssue": false
 }

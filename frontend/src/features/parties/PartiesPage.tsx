@@ -1,5 +1,7 @@
+import { useState, useMemo } from 'react';
 import { useCursorPagination } from '@/hooks/use-cursor-pagination';
 import { getParties, getPartiesByUrl } from '@/services/parties';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { PaginationControls } from '@/components/shared/PaginationControls';
 import { Spinner } from '@/components/ui/Spinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
@@ -8,17 +10,17 @@ import { PartyCard } from './components/PartyCard';
 import { useLang } from '@/contexts/language-context';
 import type { Party } from '@/types/api';
 
-const emptyParams = {};
-
 export default function PartiesPage() {
   const { lang } = useLang();
   const isNe = lang === 'ne';
+  const [search, setSearch] = useState('');
+  const params = useMemo(() => (search ? { search } : {}), [search]);
 
   const { items, isLoading, error, hasNext, hasPrevious, goNext, goPrevious } =
     useCursorPagination<Party>(
-      (_params, signal) => getParties(signal),
+      (p, signal) => getParties(p, signal),
       (url, signal) => getPartiesByUrl(url, signal),
-      emptyParams,
+      params,
     );
 
   return (
@@ -29,6 +31,12 @@ export default function PartiesPage() {
           {isNe ? 'निर्वाचनमा भाग लिने राजनीतिक दलहरू' : 'Political parties in the election'}
         </p>
       </div>
+
+      <SearchInput
+        value={search}
+        onChange={(v) => setSearch(v)}
+        placeholder={isNe ? 'दलको नाम खोज्नुहोस्...' : 'Search by party name...'}
+      />
 
       {isLoading && items.length === 0 ? (
         <div className="flex items-center justify-center py-16">

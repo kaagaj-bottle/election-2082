@@ -36,7 +36,7 @@ export default function HomePage() {
   );
 
   const parties = useApi<CursorPage<Party>>(
-    (signal) => getParties(signal),
+    (signal) => getParties(undefined, signal),
     [],
   );
 
@@ -63,11 +63,18 @@ export default function HomePage() {
         </p>
       </div>
 
+      <div className="rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800 dark:border-primary-700 dark:bg-primary-900 dark:text-primary-200">
+        <span className="mr-2 font-medium">ℹ</span>
+        {isNe
+          ? 'निर्वाचनको समयमा यो साइटले प्रत्यक्ष (लाइभ) नतिजा प्रदर्शन गर्नेछ।'
+          : 'When elections take place, this site will show live results.'}
+      </div>
+
       {electionDetail.data && <ElectionSummary election={electionDetail.data} />}
 
       <StatsGrid
         provinceCount={provinces.data?.results.length ?? 0}
-        districtCount={0}
+        districtCount={electionDetail.data?.total_districts ?? 0}
         constituencyCount={electionDetail.data?.total_seats_fptp ?? 0}
         partyCount={parties.data?.results.length ?? 0}
       />
