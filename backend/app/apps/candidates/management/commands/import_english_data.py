@@ -11,6 +11,7 @@ from django.core.management.base import BaseCommand, CommandParser
 
 from app.apps.candidates.models import Candidate
 from app.apps.parties.models import Party
+from app.core.management.commands.transliterate_all import DISTRICT_NAMES
 
 DEFAULT_INPUT = Path(__file__).resolve().parents[5] / "ekantipur_english_data.json"
 
@@ -128,7 +129,9 @@ class Command(BaseCommand):
         constituency_candidates: dict[tuple[str, int], list[Candidate]] = {}
         for c in candidates:
             if c.constituency:
-                key = (c.constituency.district.name.lower(), c.constituency.number)
+                district = c.constituency.district
+                canonical = DISTRICT_NAMES.get(district.name_ne, district.name or "")
+                key = (canonical.lower(), c.constituency.number)
                 constituency_candidates.setdefault(key, []).append(c)
 
         self.stdout.write(
