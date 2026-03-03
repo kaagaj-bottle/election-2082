@@ -21,7 +21,12 @@ DATABASES = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = [
+    "https://election-2082.vercel.app",
+]
+_extra_origins = os.environ.get("CORS_ALLOWED_ORIGINS", "")
+if _extra_origins:
+    CORS_ALLOWED_ORIGINS += [o.strip() for o in _extra_origins.split(",") if o.strip()]
 
 # Security
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
