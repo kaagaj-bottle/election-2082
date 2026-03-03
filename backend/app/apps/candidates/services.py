@@ -139,36 +139,43 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
                 "election": election,
                 "election_type": ElectionType.FPTP,
                 "name_ne": row["CandidateName"],
-                "name": transliterate(row["CandidateName"]),
                 "age": int(row["AGE_YR"]) if row["AGE_YR"] else None,
                 "gender": GENDER_MAP.get(gender_ne, Gender.OTHER),
                 "father_name": father_name,
-                "father_name_en": transliterate(father_name),
                 "spouse_name": spouse_name,
-                "spouse_name_en": transliterate(spouse_name),
                 "address": address,
-                "address_en": transliterate(address),
                 "citizenship_district": ctzdist,
-                "citizenship_district_en": transliterate(ctzdist),
                 "qualification": qualification,
-                "qualification_en": transliterate(qualification),
                 "institution": institution,
-                "institution_en": transliterate(institution),
                 "experience": experience,
-                "experience_en": transliterate(experience),
                 "other_details": other_details,
-                "other_details_en": transliterate(other_details),
                 "party": party_cache[party_name],
                 "election_symbol_code": int(row["SYMBOLCODE"]) if row.get("SYMBOLCODE") else None,
                 "election_symbol_name": symbol_name,
-                "election_symbol_name_en": transliterate(symbol_name),
                 "constituency": constituency_cache[(district_name, const_number)],
                 "votes_received": int(row.get("TotalVoteReceived") or 0),
                 "status": _clean_text(row.get("E_STATUS")),
             }
 
+            # Transliterated English fields — only set on create so that
+            # actual English names (from import_english_data) aren't overwritten.
+            english_defaults = {
+                "name": transliterate(row["CandidateName"]),
+                "father_name_en": transliterate(father_name),
+                "spouse_name_en": transliterate(spouse_name),
+                "address_en": transliterate(address),
+                "citizenship_district_en": transliterate(ctzdist),
+                "qualification_en": transliterate(qualification),
+                "institution_en": transliterate(institution),
+                "experience_en": transliterate(experience),
+                "other_details_en": transliterate(other_details),
+                "election_symbol_name_en": transliterate(symbol_name),
+            }
+
             if source_id not in existing_source_ids:
-                candidates_to_create.append(Candidate(source_id=source_id, **candidate_data))
+                candidates_to_create.append(
+                    Candidate(source_id=source_id, **candidate_data, **english_defaults)
+                )
             else:
                 Candidate.objects.filter(election=election, source_id=source_id).update(
                     **candidate_data

@@ -183,6 +183,21 @@ FPTP candidate data is sourced from the [Nepal Election Commission](https://resu
 
 **Backend**: Deploy with Docker on a VPS. Copy `.env.example` to `.env`, configure your values, and run `docker-compose up -d`. Use the provided `nginx/election-api.conf` to proxy `/api/` to the backend container.
 
+To import election data (one-time setup or data update):
+
+```bash
+cd /path/to/election-2082
+
+# Copy data file into the container
+docker compose cp election_result_2082.json web:/tmp/election_result_2082.json
+
+# Run the import command
+docker compose exec web python manage.py import_fptp /tmp/election_result_2082.json --election hor-2082
+
+# Import actual English names (from bundled ekantipur data)
+docker compose exec web python manage.py import_english_data
+```
+
 ## License
 
 This project is for educational and civic information purposes. Election data is publicly available from the Nepal Election Commission.
