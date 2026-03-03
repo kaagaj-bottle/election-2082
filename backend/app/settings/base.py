@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "app.apps.elections",
     "app.apps.parties",
     "app.apps.candidates",
+    "app.apps.news",
 ]
 
 MIDDLEWARE = [

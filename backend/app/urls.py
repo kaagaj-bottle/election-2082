@@ -7,6 +7,7 @@ urlpatterns = [
     path("api/v1/", include("app.apps.elections.urls")),
     path("api/v1/", include("app.apps.parties.urls")),
     path("api/v1/", include("app.apps.candidates.urls")),
+    path("api/v1/", include("app.apps.news.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
 ]

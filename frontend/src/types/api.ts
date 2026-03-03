@@ -142,6 +142,17 @@ export interface ElectionStats {
   candidates_per_constituency: CandidatesPerConstituency;
 }
 
+// News
+export interface NewsArticle {
+  title: string;
+  link: string;
+  source: string;
+  source_lang: string;
+  published: string | null;
+  summary: string;
+  image_url: string | null;
+}
+
 export interface CandidateDetail {
   id: number;
   source_id: number;
