@@ -178,7 +178,6 @@ def import_fptp_from_json(file_path: str, election_slug: str) -> ImportResult:
                 ),
                 "institution_en": INSTITUTION_NAMES.get(institution, transliterate(institution)),
                 "experience_en": transliterate(experience),
-                "other_details_en": transliterate(other_details),
                 "election_symbol_name_en": SYMBOL_NAMES.get(
                     symbol_name, transliterate(symbol_name)
                 ),

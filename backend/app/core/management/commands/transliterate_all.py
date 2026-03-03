@@ -646,7 +646,6 @@ CANDIDATE_EN_FIELDS = [
     ("qualification", "qualification_en"),
     ("institution", "institution_en"),
     ("experience", "experience_en"),
-    ("other_details", "other_details_en"),
     ("election_symbol_name", "election_symbol_name_en"),
     ("inclusion_group", "inclusion_group_en"),
 ]
