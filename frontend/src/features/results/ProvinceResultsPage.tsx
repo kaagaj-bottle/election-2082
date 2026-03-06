@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 import type { ProvinceConstituencyResult } from '@/types/api';
 
 export default function ProvinceResultsPage() {
@@ -137,16 +138,25 @@ export default function ProvinceResultsPage() {
                         <div className="truncate font-medium text-ink-800 dark:text-ink-100">
                           {isNe ? c.name_ne : c.name}
                         </div>
-                        <div className="truncate text-xs text-ink-500 dark:text-ink-400">
-                          {isNe ? c.party.name_ne : c.party.name}
+                        <div className="flex items-center gap-1 text-xs text-ink-500 dark:text-ink-400">
+                          <PartySymbol symbolImage={c.party.symbol_image} size="xs" />
+                          <span className="truncate">{isNe ? c.party.name_ne : c.party.name}</span>
                         </div>
                       </div>
                       <div className="ml-3 flex items-center gap-2">
-                        <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
-                          {c.votes_received.toLocaleString()}
-                        </span>
-                        {i === 0 && topVotes > 0 && (
-                          <Badge color="green">{isNe ? 'अग्रणी' : 'Lead'}</Badge>
+                        {item.total_votes === 0 ? (
+                          <span className="text-sm text-amber-600 dark:text-amber-400">
+                            {isNe ? 'नतिजा प्रतीक्षामा' : 'Awaiting Results'}
+                          </span>
+                        ) : (
+                          <>
+                            <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
+                              {c.votes_received.toLocaleString()}
+                            </span>
+                            {i === 0 && topVotes > 0 && (
+                              <Badge color="green">{isNe ? 'अग्रणी' : 'Lead'}</Badge>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

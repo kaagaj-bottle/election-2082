@@ -121,7 +121,7 @@ function ConstituencySection({
   return (
     <Card>
       <SectionTitle>{isNe ? 'प्रति क्षेत्र उम्मेदवार' : 'Candidates per Constituency'}</SectionTitle>
-      <div className="mt-6 grid grid-cols-3 gap-4">
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="text-center">
           <p className="text-sm text-ink-500 dark:text-ink-400">{isNe ? 'औसत' : 'Average'}</p>
           <p className="text-4xl font-bold text-primary-500">{data.avg ?? '—'}</p>

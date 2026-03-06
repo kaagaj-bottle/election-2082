@@ -1,15 +1,17 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useApi } from '@/hooks/use-api';
 import { getElections } from '@/services/elections';
 import { getElection } from '@/services/elections';
 import { getProvinces } from '@/services/provinces';
 import { getParties } from '@/services/parties';
-import { getPartyTally } from '@/services/results';
+import { getPartyTally, getProvinceSummary } from '@/services/results';
 import { useLang } from '@/contexts/language-context';
-import type { CursorPage, ElectionListItem, ElectionDetail, Province, Party, PartyTally } from '@/types/api';
+import type { CursorPage, ElectionListItem, ElectionDetail, Province, Party, PartyTally, ProvinceSummary } from '@/types/api';
 import { Spinner } from '@/components/ui/Spinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LastUpdatedBadge } from '@/features/results/components/LastUpdatedBadge';
+import { ProvinceSummaryGrid } from '@/features/results/components/ProvinceSummaryGrid';
 import { ElectionSummary } from './components/ElectionSummary';
 import { StatsGrid } from './components/StatsGrid';
 import { HotSeats } from './components/HotSeats';
@@ -45,6 +47,16 @@ export default function HomePage() {
   );
 
   const partyTally = useApi<PartyTally[]>((signal) => getPartyTally(signal), []);
+  const provinceSummary = useApi<ProvinceSummary[]>((signal) => getProvinceSummary(signal), []);
+
+  // Auto-refresh every 2 minutes
+  useEffect(() => {
+    const id = setInterval(() => {
+      partyTally.refetch();
+      provinceSummary.refetch();
+    }, 2 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [partyTally.refetch, provinceSummary.refetch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (elections.isLoading) {
     return (
@@ -80,9 +92,12 @@ export default function HomePage() {
           <div className="space-y-1.5">
             {partyTally.data.slice(0, 5).map((p) => (
               <div key={p.party_id} className="flex items-center justify-between text-sm">
-                <span className="text-ink-700 dark:text-ink-200">
+                <Link
+                  to={`/candidates?party=${p.party_id}`}
+                  className="text-ink-700 hover:text-primary-600 hover:underline dark:text-ink-200 dark:hover:text-primary-400"
+                >
                   {isNe ? p.party_name_ne : p.party_name}
-                </span>
+                </Link>
                 <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
                   <span className="text-green-600 dark:text-green-400">{p.seats_won}</span>
                   {p.seats_leading > 0 && (
@@ -111,6 +126,10 @@ export default function HomePage() {
             {isNe ? 'नतिजा' : 'Results'}
           </Link>
         </div>
+      )}
+
+      {partyTally.data && partyTally.data.some((p) => p.total_votes > 0) && provinceSummary.data && (
+        <ProvinceSummaryGrid data={provinceSummary.data} />
       )}
 
       <HotSeats />

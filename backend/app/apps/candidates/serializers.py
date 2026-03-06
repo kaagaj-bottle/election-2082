@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.db.models import Sum
 from rest_framework import serializers
 
 from app.apps.candidates.models import Candidate
@@ -14,6 +15,7 @@ from app.core.bilingual import BilingualMixin
 class CandidateListSerializer(BilingualMixin, serializers.ModelSerializer[Candidate]):
     party = PartySerializer(read_only=True)
     constituency = ConstituencySerializer(read_only=True)
+    constituency_has_results = serializers.SerializerMethodField()
 
     bilingual_field_map = {
         "name": {"ne": "name_ne", "en": "name"},
@@ -34,13 +36,24 @@ class CandidateListSerializer(BilingualMixin, serializers.ModelSerializer[Candid
             "votes_received",
             "status",
             "photo_url",
+            "constituency_has_results",
         ]
+
+    def get_constituency_has_results(self, obj: Candidate) -> bool | None:
+        if obj.constituency_id is None:
+            return None
+        total = Candidate.objects.filter(
+            constituency_id=obj.constituency_id,
+            election_id=obj.election_id,
+        ).aggregate(total=Sum("votes_received"))["total"]
+        return (total or 0) > 0
 
 
 class CandidateDetailSerializer(BilingualMixin, serializers.ModelSerializer[Candidate]):
     party = PartySerializer(read_only=True)
     constituency = ConstituencySerializer(read_only=True)
     election = ElectionListSerializer(read_only=True)
+    constituency_has_results = serializers.SerializerMethodField()
 
     bilingual_field_map = {
         "name": {"ne": "name_ne", "en": "name"},
@@ -96,4 +109,14 @@ class CandidateDetailSerializer(BilingualMixin, serializers.ModelSerializer[Cand
             "inclusion_group_en",
             "has_disability",
             "photo_url",
+            "constituency_has_results",
         ]
+
+    def get_constituency_has_results(self, obj: Candidate) -> bool | None:
+        if obj.constituency_id is None:
+            return None
+        total = Candidate.objects.filter(
+            constituency_id=obj.constituency_id,
+            election_id=obj.election_id,
+        ).aggregate(total=Sum("votes_received"))["total"]
+        return (total or 0) > 0

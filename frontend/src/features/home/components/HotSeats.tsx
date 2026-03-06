@@ -6,6 +6,7 @@ import { useLang } from '@/contexts/language-context';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Spinner } from '@/components/ui/Spinner';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 import type { HotSeat } from '@/types/api';
 
 function ChevronIcon({ expanded }: { expanded: boolean }) {
@@ -106,7 +107,8 @@ export function HotSeats() {
                         >
                           {isNe ? c.name_ne : c.name}
                         </Link>
-                        <span className="ml-2 text-ink-500 dark:text-ink-400">
+                        <span className="ml-2 inline-flex items-center gap-1 text-ink-500 dark:text-ink-400">
+                          <PartySymbol symbolImage={c.party.symbol_image} size="xs" />
                           {isNe ? c.party.name_ne : c.party.name}
                         </span>
                       </div>
@@ -171,7 +173,10 @@ export function HotSeats() {
                             </Link>
                           </td>
                           <td className="px-2 py-2 text-ink-600 dark:text-ink-300">
-                            {isNe ? c.party.name_ne : c.party.name}
+                            <div className="flex items-center gap-1">
+                              <PartySymbol symbolImage={c.party.symbol_image} size="xs" />
+                              {isNe ? c.party.name_ne : c.party.name}
+                            </div>
                           </td>
                           <td className="px-2 py-2 text-right">
                             {topVotes === 0 ? (

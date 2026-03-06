@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select';
 import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { Badge } from '@/components/ui/Badge';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 import type {
   CursorPage,
   Province,
@@ -166,21 +167,32 @@ export function ConstituencyResults() {
                       </div>
                     </td>
                     <td className="px-3 py-2.5 text-ink-600 dark:text-ink-300">
-                      {isNe ? c.party.name_ne : c.party.name}
+                      <div className="flex items-center gap-2">
+                        <PartySymbol symbolImage={c.party.symbol_image} size="sm" />
+                        {isNe ? c.party.name_ne : c.party.name}
+                      </div>
                     </td>
                     <td className="px-3 py-2.5 text-right">
-                      <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
-                        {c.votes_received.toLocaleString()}
-                      </span>
-                      {c.status === 'Elected' ? (
-                        <Badge color="green">
-                          {isNe ? 'निर्वाचित' : 'Elected'}
-                        </Badge>
-                      ) : i === 0 && topVotes > 0 ? (
-                        <Badge color="amber">
-                          {isNe ? 'अग्रणी' : 'Leading'}
-                        </Badge>
-                      ) : null}
+                      {topVotes === 0 ? (
+                        <span className="text-sm text-amber-600 dark:text-amber-400">
+                          {isNe ? 'नतिजा प्रतीक्षामा' : 'Awaiting Results'}
+                        </span>
+                      ) : (
+                        <>
+                          <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
+                            {c.votes_received.toLocaleString()}
+                          </span>
+                          {c.status === 'Elected' ? (
+                            <Badge color="green">
+                              {isNe ? 'निर्वाचित' : 'Elected'}
+                            </Badge>
+                          ) : i === 0 && topVotes > 0 ? (
+                            <Badge color="amber">
+                              {isNe ? 'अग्रणी' : 'Leading'}
+                            </Badge>
+                          ) : null}
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))}

@@ -66,6 +66,7 @@ export interface Party {
   id: number;
   name_ne: string;
   name: string;
+  symbol_image: string;
 }
 
 export interface PartyDetail extends Party {
@@ -89,6 +90,7 @@ export interface CandidateListItem {
   votes_received: number;
   status: string;
   photo_url: string | null;
+  constituency_has_results: boolean | null;
 }
 
 // Stats
@@ -159,6 +161,7 @@ export interface PartyTally {
   party_id: number;
   party_name_ne: string;
   party_name: string;
+  party_symbol_image: string;
   seats_won: number;
   seats_leading: number;
   total_seats: number;
@@ -232,4 +235,5 @@ export interface CandidateDetail {
   inclusion_group_en: string;
   has_disability: boolean;
   photo_url: string | null;
+  constituency_has_results: boolean | null;
 }

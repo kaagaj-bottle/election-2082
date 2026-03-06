@@ -216,7 +216,7 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
 
         # Get party totals via aggregation
         party_rows = list(
-            qs.values("party_id", "party__name_ne", "party__name")
+            qs.values("party_id", "party__name_ne", "party__name", "party__symbol_image")
             .annotate(
                 total_votes=Sum("votes_received"),
                 candidate_count=Count("id"),
@@ -234,6 +234,7 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
                     "party_id": pid,
                     "party_name_ne": row["party__name_ne"],
                     "party_name": row["party__name"],
+                    "party_symbol_image": row["party__symbol_image"],
                     "seats_won": won,
                     "seats_leading": leading,
                     "total_seats": won + leading,

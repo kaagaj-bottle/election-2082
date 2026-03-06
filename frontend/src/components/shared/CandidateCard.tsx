@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom';
 import type { CandidateListItem } from '@/types/api';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Avatar } from '@/components/ui/Avatar';
+
 import { useLang } from '@/contexts/language-context';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 
 interface CandidateCardProps {
   candidate: CandidateListItem;
@@ -32,7 +33,9 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
     <Link to={`/candidates/${candidate.id}`}>
       <Card className="transition-shadow hover:shadow-md">
         <div className="flex gap-4">
-          <Avatar src={candidate.photo_url} name={candidate.name_ne || candidate.name} size="md" />
+          <div className="self-center">
+            <PartySymbol symbolImage={candidate.party.symbol_image} size="lg" />
+          </div>
           <div className="min-w-0 flex-1">
             <h3
               className={`truncate text-base font-semibold text-ink-800 dark:text-ink-100 ${isNe ? 'font-nepali' : ''}`}
@@ -68,11 +71,19 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
                   - {candidate.constituency.number}
                 </Badge>
               )}
-              {candidate.votes_received > 0 && (
+              {candidate.votes_received > 0 ? (
                 <Badge color="green">
                   {candidate.votes_received.toLocaleString()} {isNe ? 'मत' : 'votes'}
                 </Badge>
-              )}
+              ) : candidate.constituency_has_results === false ? (
+                <Badge color="amber">
+                  {isNe ? 'नतिजा प्रतीक्षामा' : 'Awaiting Results'}
+                </Badge>
+              ) : candidate.constituency_has_results === true ? (
+                <Badge color="green">
+                  0 {isNe ? 'मत' : 'votes'}
+                </Badge>
+              ) : null}
             </div>
           </div>
         </div>

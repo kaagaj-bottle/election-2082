@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Avatar } from '@/components/ui/Avatar';
 import { useLang } from '@/contexts/language-context';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 
 interface CandidateProfileProps {
   candidate: CandidateDetail;
@@ -83,7 +84,15 @@ export function CandidateProfile({ candidate }: CandidateProfileProps) {
             {n('दल र निर्वाचन', 'Party & Election')}
           </h2>
           <dl className="space-y-3">
-            <InfoRow label={n('दल', 'Party')} value={name(candidate.party)} />
+            <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-4">
+              <dt className="w-40 shrink-0 text-sm text-ink-500 dark:text-ink-400">
+                {n('दल', 'Party')}
+              </dt>
+              <dd className="flex items-center gap-2 text-sm text-ink-800 dark:text-ink-100">
+                <PartySymbol symbolImage={candidate.party.symbol_image} size="md" />
+                {name(candidate.party)}
+              </dd>
+            </div>
             <InfoRow
               label={n('चुनाव चिन्ह', 'Election Symbol')}
               value={detail(candidate.election_symbol_name, candidate.election_symbol_name_en)}
@@ -106,7 +115,9 @@ export function CandidateProfile({ candidate }: CandidateProfileProps) {
               value={
                 candidate.votes_received > 0
                   ? candidate.votes_received.toLocaleString()
-                  : n('नतिजा प्रतीक्षामा', 'Awaiting results')
+                  : candidate.constituency_has_results === true
+                    ? '0'
+                    : n('नतिजा प्रतीक्षामा', 'Awaiting results')
               }
             />
             {candidate.status && (

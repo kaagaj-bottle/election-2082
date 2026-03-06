@@ -1,5 +1,7 @@
+import { Link } from 'react-router-dom';
 import { useLang } from '@/contexts/language-context';
 import { Card } from '@/components/ui/Card';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 import type { PartyTally } from '@/types/api';
 
 interface PartyStandingsProps {
@@ -45,8 +47,16 @@ export function PartyStandings({ data, limit }: PartyStandingsProps) {
                 key={party.party_id}
                 className="border-b border-surface-100 last:border-0 dark:border-surface-800"
               >
-                <td className="py-2.5 pr-3 font-medium text-ink-800 dark:text-ink-100">
-                  {isNe ? party.party_name_ne : party.party_name}
+                <td className="py-2.5 pr-3 font-medium">
+                  <div className="flex items-center gap-2">
+                    <PartySymbol symbolImage={party.party_symbol_image} size="sm" />
+                    <Link
+                      to={`/candidates?party=${party.party_id}`}
+                      className="text-ink-800 hover:text-primary-600 hover:underline dark:text-ink-100 dark:hover:text-primary-400"
+                    >
+                      {isNe ? party.party_name_ne : party.party_name}
+                    </Link>
+                  </div>
                 </td>
                 <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-green-600 dark:text-green-400">
                   {party.seats_won}
