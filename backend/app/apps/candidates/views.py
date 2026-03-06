@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
 from collections import defaultdict
+from pathlib import Path
 
+from django.conf import settings
 from django.db.models import (
     Avg,
     Case,
@@ -21,6 +24,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from app.apps.candidates.filters import CandidateFilterSet
 from app.apps.candidates.models import Candidate, ElectionType, ResultFetchLog
 from app.apps.candidates.serializers import CandidateDetailSerializer, CandidateListSerializer
+from app.apps.elections.serializers import ConstituencySerializer
 
 
 class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
@@ -285,3 +289,51 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
                 "candidates_updated": 0,
             }
         )
+
+    @action(detail=False, methods=["get"], url_path="results/hotseats", pagination_class=None)
+    def results_hotseats(self, request: Request) -> Response:
+        """Return full constituency results for featured candidates."""
+        config_path: Path = settings.BASE_DIR / "hotseats.json"
+        if not config_path.exists():
+            return Response([])
+
+        names: list[str] = json.loads(config_path.read_text(encoding="utf-8"))
+
+        # Find the featured candidates
+        featured = (
+            Candidate.objects.filter(election_type=ElectionType.FPTP, name__in=names)
+            .select_related("constituency__district__province")
+            .only("id", "name", "constituency_id")
+        )
+
+        # Build result per constituency
+        result = []
+        seen_constituencies: set[int] = set()
+        for candidate in featured:
+            cid = candidate.constituency_id
+            if cid is None or cid in seen_constituencies:
+                continue
+            seen_constituencies.add(cid)
+
+            candidates_qs = (
+                Candidate.objects.filter(
+                    election_type=ElectionType.FPTP,
+                    constituency_id=cid,
+                )
+                .select_related("party", "constituency__district__province")
+                .order_by("-votes_received", "id")
+            )
+            serializer = CandidateListSerializer(
+                candidates_qs, many=True, context={"request": request}
+            )
+            result.append(
+                {
+                    "candidate_name": candidate.name,
+                    "constituency": ConstituencySerializer(
+                        candidate.constituency, context={"request": request}
+                    ).data,
+                    "candidates": serializer.data,
+                }
+            )
+
+        return Response(result)
