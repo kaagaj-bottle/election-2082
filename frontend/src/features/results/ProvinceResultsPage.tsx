@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useApi } from '@/hooks/use-api';
 import { getProvinceResults } from '@/services/results';
@@ -24,6 +24,19 @@ export default function ProvinceResultsPage() {
     const id = setInterval(() => results.refetch(), 2 * 60 * 1000);
     return () => clearInterval(id);
   }, [results.refetch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [districtSearch, setDistrictSearch] = useState('');
+
+  const filteredResults = useMemo(() => {
+    if (!results.data) return null;
+    if (!districtSearch.trim()) return results.data;
+    const q = districtSearch.trim().toLowerCase();
+    return results.data.filter(
+      (item) =>
+        item.constituency.district.name.toLowerCase().includes(q) ||
+        item.constituency.district.name_ne.includes(q),
+    );
+  }, [results.data, districtSearch]);
 
   const provinceName = results.data?.[0]?.constituency.district.province;
   const title = provinceName
@@ -68,9 +81,34 @@ export default function ProvinceResultsPage() {
         </p>
       </div>
 
-      {results.data && results.data.length > 0 ? (
+      {results.data && results.data.length > 0 && (
+        <div className="relative">
+          <svg
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+            />
+          </svg>
+          <input
+            type="text"
+            value={districtSearch}
+            onChange={(e) => setDistrictSearch(e.target.value)}
+            placeholder={isNe ? 'जिल्ला खोज्नुहोस्...' : 'Search district...'}
+            className="w-full rounded border border-surface-300 bg-white py-2 pl-9 pr-3 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500 sm:max-w-xs"
+          />
+        </div>
+      )}
+
+      {filteredResults && filteredResults.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {results.data.map((item) => {
+          {filteredResults.map((item) => {
             const topVotes = item.top_candidates[0]?.votes_received ?? 0;
             return (
               <Card key={item.constituency.id}>
@@ -124,11 +162,15 @@ export default function ProvinceResultsPage() {
             );
           })}
         </div>
-      ) : (
+      ) : filteredResults && filteredResults.length === 0 && districtSearch.trim() ? (
+        <p className="py-10 text-center text-sm text-ink-400">
+          {isNe ? 'कुनै जिल्ला भेटिएन।' : 'No districts match your search.'}
+        </p>
+      ) : !results.data?.length ? (
         <p className="py-10 text-center text-sm text-ink-400">
           {isNe ? 'यस प्रदेशको नतिजा उपलब्ध छैन।' : 'No results available for this province.'}
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

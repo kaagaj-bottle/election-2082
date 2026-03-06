@@ -7,8 +7,10 @@ Only updates votes_received and status — never touches candidate identity fiel
 
 import json
 import logging
+import os
 import re
 import time
+import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
@@ -183,6 +185,32 @@ def _update_candidates(data: list[dict[str, Any]], election: Election) -> int:
     return updated_count
 
 
+def _notify_discord(result: FetchResult) -> None:
+    """Send a Discord webhook notification after a successful fetch."""
+    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
+    if not webhook_url:
+        return
+    try:
+        msg = (
+            f"**Election Results Updated**\n"
+            f"Records fetched: {result.records_fetched}\n"
+            f"Candidates updated: {result.candidates_updated}\n"
+            f"Duration: {result.duration_seconds:.1f}s"
+        )
+        payload = json.dumps({"content": msg}).encode("utf-8")
+        req = urllib.request.Request(
+            webhook_url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=10):
+            pass
+        logger.info("Discord notification sent")
+    except Exception:
+        logger.warning("Discord notification failed", exc_info=True)
+
+
 def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
     """
     Main entry point: fetch live results and update candidates.
@@ -232,6 +260,8 @@ def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
             candidates_updated=candidates_updated,
             duration_seconds=duration,
         )
+        if candidates_updated > 0:
+            _notify_discord(result)
         return result
 
     except Exception as e:
