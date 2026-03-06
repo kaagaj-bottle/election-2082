@@ -103,7 +103,11 @@ export function CandidateProfile({ candidate }: CandidateProfileProps) {
             )}
             <InfoRow
               label={n('प्राप्त मत', 'Votes Received')}
-              value={candidate.votes_received.toLocaleString()}
+              value={
+                candidate.votes_received > 0
+                  ? candidate.votes_received.toLocaleString()
+                  : n('नतिजा प्रतीक्षामा', 'Awaiting results')
+              }
             />
             {candidate.status && (
               <InfoRow label={n('स्थिति', 'Status')} value={candidate.status} />
