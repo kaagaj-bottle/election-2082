@@ -31,9 +31,6 @@ export function PartyStandings({ data, limit }: PartyStandingsProps) {
               <th className="hidden px-3 py-2 text-left font-medium text-ink-500 dark:text-ink-400 sm:table-cell">
                 &nbsp;
               </th>
-              <th className="px-3 py-2 text-right font-medium text-ink-500 dark:text-ink-400">
-                {isNe ? 'कुल मत' : 'Total Votes'}
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -55,9 +52,6 @@ export function PartyStandings({ data, limit }: PartyStandingsProps) {
                       style={{ width: `${(party.seats_won / maxSeats) * 100}%` }}
                     />
                   </div>
-                </td>
-                <td className="px-3 py-2.5 text-right tabular-nums text-ink-600 dark:text-ink-300">
-                  {party.total_votes.toLocaleString()}
                 </td>
               </tr>
             ))}

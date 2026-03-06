@@ -54,7 +54,7 @@ export default function ResultsPage() {
         <LastUpdatedBadge />
       </div>
 
-      {partyTally.data && <PartyStandings data={partyTally.data} />}
+      {partyTally.data && <PartyStandings data={partyTally.data} limit={10} />}
 
       {provinceSummary.data && <ProvinceSummaryGrid data={provinceSummary.data} />}
 
