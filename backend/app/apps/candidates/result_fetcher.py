@@ -7,109 +7,36 @@ Only updates votes_received and status — never touches candidate identity fiel
 
 import json
 import logging
-import re
 import time
-import urllib.request
-from dataclasses import dataclass
 from typing import Any
 
-from curl_cffi.requests import Session
 from django.db import transaction
 
+from app.apps.candidates.fetch_helpers import (
+    BASE_URL,
+    FetchResult,
+    build_session,
+    establish_session,
+    notify_discord,
+)
 from app.apps.candidates.models import Candidate, ElectionType, ResultFetchLog
 from app.apps.elections.models import Election
 
 logger = logging.getLogger(__name__)
-
-BASE_URL = "https://result.election.gov.np"
 
 _URL_PATHS = [
     "/Handlers/SecureJson.ashx?file=JSONFiles/ElectionResultCentral2082.txt",
     "/Handlers/SecureJson.ashx?file=JSONFiles/Election2082/ElectionResultCentral2082.txt",
 ]
 
-# Pages to try for session establishment (in order)
-_SESSION_PAGES = [
-    "/",
-    "/MapElectionResult2082.aspx",
-]
-
 # Minimum number of records expected — safety check against partial/corrupt data
 MIN_EXPECTED_RECORDS = 100
 
 
-@dataclass
-class FetchResult:
-    success: bool
-    records_fetched: int = 0
-    candidates_updated: int = 0
-    error_message: str = ""
-    duration_seconds: float = 0
-
-
-def _build_session() -> Session:  # type: ignore[type-arg]
-    """Create a curl_cffi session with Chrome TLS impersonation."""
-    return Session(impersonate="chrome")
-
-
-def _establish_session(session: Session) -> str | None:  # type: ignore[type-arg]
-    """Try session pages to establish cookies and extract CSRF token."""
-    html = ""
-    for page in _SESSION_PAGES:
-        url = BASE_URL + page
-        try:
-            resp = session.get(url, timeout=30)
-            if resp.status_code == 200:
-                html = resp.text
-                logger.debug("Session established via %s", page)
-                break
-            logger.warning("Session page %s failed: HTTP %d", page, resp.status_code)
-        except Exception:
-            logger.warning("Session page %s failed", page, exc_info=True)
-
-    if not html:
-        logger.warning("All session pages failed — proceeding without session")
-        return None
-
-    # Try extracting token from CsrfToken cookie
-    val = session.cookies.get("CsrfToken")
-    if val:
-        logger.debug("Found CSRF token in CsrfToken cookie")
-        return val
-
-    # Fall back to HTML patterns
-    patterns = [
-        r'<meta\s+name=["\']csrf-token["\']\s+content=["\']([^"\']+)["\']',
-        r'<input[^>]+name=["\']__RequestVerificationToken["\'][^>]+value=["\']([^"\']+)["\']',
-        r"getCsrfToken\(\)\s*\{[^}]*return\s+['\"]([^'\"]+)['\"]",
-        r'var\s+csrfToken\s*=\s*["\']([^"\']+)["\']',
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, html, re.IGNORECASE)
-        if match:
-            logger.debug("Found CSRF token via pattern: %s", pattern[:40])
-            return match.group(1)
-
-    # Last resort: fetch Common.js
-    try:
-        resp = session.get(BASE_URL + "/JSLibrary/Common.js", timeout=30)
-        js_text = resp.text
-        for pattern in patterns:
-            match = re.search(pattern, js_text, re.IGNORECASE)
-            if match:
-                logger.debug("Found CSRF token in Common.js")
-                return match.group(1)
-    except Exception:
-        logger.warning("Could not fetch Common.js", exc_info=True)
-
-    logger.debug("No CSRF token found — proceeding without one")
-    return None
-
-
 def _fetch_json_data() -> list[dict[str, Any]]:
     """Try each URL strategy with curl_cffi session until one succeeds."""
-    session = _build_session()
-    csrf_token = _establish_session(session)
+    session = build_session()
+    csrf_token = establish_session(session)
 
     headers = {
         "Referer": BASE_URL + "/",
@@ -184,36 +111,6 @@ def _update_candidates(data: list[dict[str, Any]], election: Election) -> int:
     return updated_count
 
 
-def _notify_discord(result: FetchResult) -> None:
-    """Send a Discord webhook notification after a successful fetch."""
-    from django.conf import settings
-
-    webhook_url = "https://discord.com/api/webhooks/1479408561338449950/mZW_c6ihgJZtM9YEacPmROiwlQVaKMWt_YDEYJB6dIpq32hoAyDOViU12OveXBElYHJB"
-    try:
-        env_label = "DEV" if settings.DEBUG else "PRODUCTION"
-        msg = (
-            f"**[{env_label}] Election Results Updated**\n"
-            f"Records fetched: {result.records_fetched}\n"
-            f"Candidates updated: {result.candidates_updated}\n"
-            f"Duration: {result.duration_seconds:.1f}s"
-        )
-        payload = json.dumps({"content": msg}).encode("utf-8")
-        req = urllib.request.Request(
-            webhook_url,
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "User-Agent": "Election2082-Bot",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10):
-            pass
-        logger.info("Discord notification sent")
-    except Exception:
-        logger.warning("Discord notification failed", exc_info=True)
-
-
 def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
     """
     Main entry point: fetch live results and update candidates.
@@ -263,7 +160,7 @@ def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
             candidates_updated=candidates_updated,
             duration_seconds=duration,
         )
-        _notify_discord(result)
+        notify_discord(result, label="FPTP Results")
         return result
 
     except Exception as e:

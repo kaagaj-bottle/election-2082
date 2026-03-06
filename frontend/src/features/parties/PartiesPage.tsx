@@ -62,7 +62,7 @@ export default function PartiesPage() {
         <EmptyState title={isNe ? 'कुनै दल भेटिएन' : 'No parties found'} />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((party) => (
+          {[...items].sort((a, b) => b.pr_votes_received - a.pr_votes_received).map((party) => (
             <PartyCard key={party.id} party={party} tally={tallyMap?.get(party.id)} />
           ))}
         </div>

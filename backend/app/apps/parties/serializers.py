@@ -16,7 +16,7 @@ class PartySerializer(BilingualMixin, serializers.ModelSerializer[Party]):
 
     class Meta:
         model = Party
-        fields = ["id", "name_ne", "name", "symbol_image"]
+        fields = ["id", "name_ne", "name", "symbol_image", "pr_votes_received"]
 
 
 class PartyDetailSerializer(BilingualMixin, serializers.ModelSerializer[Party]):
@@ -25,7 +25,7 @@ class PartyDetailSerializer(BilingualMixin, serializers.ModelSerializer[Party]):
 
     class Meta:
         model = Party
-        fields = ["id", "name_ne", "name", "symbol_image", "candidate_count"]
+        fields = ["id", "name_ne", "name", "symbol_image", "pr_votes_received", "candidate_count"]
 
     @staticmethod
     def setup_eager_loading(queryset):  # type: ignore[no-untyped-def]

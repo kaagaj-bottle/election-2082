@@ -5,6 +5,7 @@ class Party(models.Model):
     name_ne = models.CharField(max_length=300, unique=True)
     name = models.CharField(max_length=300, blank=True)
     symbol_image = models.CharField(max_length=100, blank=True)
+    pr_votes_received = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = "parties"

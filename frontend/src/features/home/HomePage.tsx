@@ -4,14 +4,15 @@ import { useApi } from '@/hooks/use-api';
 import { getElections } from '@/services/elections';
 import { getElection } from '@/services/elections';
 import { getPartyTally, getProvinceSummary } from '@/services/results';
+import { getParties } from '@/services/parties';
 import { useLang } from '@/contexts/language-context';
-import type { CursorPage, ElectionListItem, ElectionDetail, PartyTally, ProvinceSummary } from '@/types/api';
+import type { CursorPage, ElectionListItem, ElectionDetail, PartyTally, ProvinceSummary, Party } from '@/types/api';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LastUpdatedBadge } from '@/features/results/components/LastUpdatedBadge';
 import { ProvinceSummaryGrid } from '@/features/results/components/ProvinceSummaryGrid';
+import { PartySymbol } from '@/components/shared/PartySymbol';
 import { ElectionSummary } from './components/ElectionSummary';
-import { HotSeats } from './components/HotSeats';
 
 export default function HomePage() {
   const { lang } = useLang();
@@ -34,6 +35,11 @@ export default function HomePage() {
 
   const partyTally = useApi<PartyTally[]>((signal) => getPartyTally(signal), []);
   const provinceSummary = useApi<ProvinceSummary[]>((signal) => getProvinceSummary(signal), []);
+  const parties = useApi<CursorPage<Party>>((signal) => getParties(undefined, signal), []);
+
+  const topPrParties = parties.data
+    ? [...parties.data.results].sort((a, b) => b.pr_votes_received - a.pr_votes_received).slice(0, 10)
+    : [];
 
   // Auto-refresh every 2 minutes
   useEffect(() => {
@@ -142,7 +148,36 @@ export default function HomePage() {
         </div>
       )}
 
-      <HotSeats />
+      {topPrParties.length > 0 && (
+        <div className="rounded-lg border border-surface-200 px-4 py-3 dark:border-surface-700">
+          <h2 className="mb-2 font-semibold text-ink-800 dark:text-ink-100">
+            {isNe ? 'समानुपातिक मत' : 'PR Votes'}
+          </h2>
+          <div className="space-y-1.5">
+            {topPrParties.map((p, i) => (
+              <div key={p.id} className={`flex items-center gap-2 ${i === 0 ? 'text-base font-bold' : 'text-sm'}`}>
+                <span className="w-5 text-right text-xs text-ink-400">{i + 1}</span>
+                <PartySymbol symbolImage={p.symbol_image} size="xs" />
+                <Link
+                  to={`/candidates?party=${p.id}`}
+                  className="truncate text-ink-700 hover:text-primary-600 hover:underline dark:text-ink-200 dark:hover:text-primary-400"
+                >
+                  {isNe ? p.name_ne : p.name}
+                </Link>
+                <span className="ml-auto shrink-0 font-semibold tabular-nums text-ink-800 dark:text-ink-100">
+                  {p.pr_votes_received.toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+          <Link
+            to="/parties"
+            className="mt-2 inline-block text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+          >
+            {isNe ? 'सबै दलहरू हेर्नुहोस् →' : 'View all parties →'}
+          </Link>
+        </div>
+      )}
 
       {electionDetail.data && <ElectionSummary election={electionDetail.data} />}
 

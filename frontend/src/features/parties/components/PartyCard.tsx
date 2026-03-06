@@ -34,13 +34,19 @@ export function PartyCard({ party, tally }: PartyCardProps) {
                 {secondary}
               </p>
             )}
-            {tally && (
-              <div className="mt-2 flex gap-3 text-xs">
-                <span className="text-green-600 dark:text-green-400">{isNe ? 'जित' : 'Won'}: {tally.seats_won}</span>
-                <span className="text-amber-600 dark:text-amber-400">{isNe ? 'अग्रणी' : 'Leading'}: {tally.seats_leading}</span>
-                <span className="text-ink-500 dark:text-ink-400">{tally.total_votes.toLocaleString()} {isNe ? 'मत' : 'votes'}</span>
-              </div>
-            )}
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              {tally && (
+                <>
+                  <span className="text-green-600 dark:text-green-400">{isNe ? 'जित' : 'Won'}: {tally.seats_won}</span>
+                  <span className="text-amber-600 dark:text-amber-400">{isNe ? 'अग्रणी' : 'Leading'}: {tally.seats_leading}</span>
+                </>
+              )}
+              {party.pr_votes_received > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-primary-50 px-2 py-0.5 font-semibold text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                  {isNe ? 'समानुपातिक मत' : 'PR'}: {party.pr_votes_received.toLocaleString()}
+                </span>
+              )}
+            </div>
           </div>
           <svg
             className="h-5 w-5 flex-shrink-0 text-ink-400 transition-transform group-hover:translate-x-0.5 dark:text-ink-500"

@@ -11,7 +11,8 @@ _lock = threading.Lock()
 
 
 def _run_loop() -> None:
-    """Background loop: fetch results, sleep, repeat."""
+    """Background loop: fetch FPTP and PR results, sleep, repeat."""
+    from app.apps.candidates.pr_result_fetcher import fetch_pr_results
     from app.apps.candidates.result_fetcher import fetch_live_results
 
     # Small initial delay to let the server finish starting
@@ -22,13 +23,25 @@ def _run_loop() -> None:
         try:
             result = fetch_live_results("hor-2082")
             if result.success:
-                logger.info("Scheduled fetch OK: %d updated", result.candidates_updated)
-                time.sleep(FETCH_INTERVAL)
+                logger.info("Scheduled FPTP fetch OK: %d updated", result.candidates_updated)
             else:
-                logger.warning("Scheduled fetch failed: %s — retrying in %ds", result.error_message, RETRY_DELAY)
-                time.sleep(RETRY_DELAY)
+                logger.warning("Scheduled FPTP fetch failed: %s", result.error_message)
         except Exception:
-            logger.exception("Scheduled fetch crashed — retrying in %ds", RETRY_DELAY)
+            logger.exception("Scheduled FPTP fetch crashed")
+
+        try:
+            pr_result = fetch_pr_results()
+            if pr_result.success:
+                logger.info("Scheduled PR fetch OK: %d parties updated", pr_result.parties_updated)
+            else:
+                logger.warning("Scheduled PR fetch failed: %s", pr_result.error_message)
+        except Exception:
+            logger.exception("Scheduled PR fetch crashed")
+
+        # Sleep based on whether both succeeded
+        if result.success and pr_result.success:  # type: ignore[possibly-undefined]
+            time.sleep(FETCH_INTERVAL)
+        else:
             time.sleep(RETRY_DELAY)
 
 

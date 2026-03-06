@@ -67,6 +67,7 @@ export interface Party {
   name_ne: string;
   name: string;
   symbol_image: string;
+  pr_votes_received: number;
 }
 
 export interface PartyDetail extends Party {
