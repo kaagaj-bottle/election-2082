@@ -7,12 +7,9 @@ Only updates votes_received and status — never touches candidate identity fiel
 
 import json
 import logging
-import os
 import re
 import time
-import urllib.request
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from typing import Any
 
 from curl_cffi.requests import Session
@@ -47,48 +44,6 @@ class FetchResult:
     candidates_updated: int = 0
     error_message: str = ""
     duration_seconds: float = 0
-
-
-def _notify_discord(result: FetchResult) -> None:
-    """Send a Discord webhook notification about a fetch result."""
-    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL")
-    if not webhook_url:
-        return
-
-    try:
-        if result.candidates_updated > 0:
-            title = "Election Results Updated"
-            color = 0x2ECC71  # green
-        else:
-            title = "No Changes"
-            color = 0x95A5A6  # grey
-
-        embed = {
-            "title": title,
-            "color": color,
-            "fields": [
-                {"name": "Records Fetched", "value": str(result.records_fetched), "inline": True},
-                {
-                    "name": "Candidates Updated",
-                    "value": str(result.candidates_updated),
-                    "inline": True,
-                },
-                {"name": "Duration", "value": f"{result.duration_seconds:.1f}s", "inline": True},
-            ],
-            "timestamp": datetime.now(UTC).isoformat(),
-        }
-        payload = json.dumps({"embeds": [embed]}).encode("utf-8")
-
-        req = urllib.request.Request(
-            webhook_url,
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10):
-            pass
-    except Exception:
-        logger.warning("Discord notification failed", exc_info=True)
 
 
 def _build_session() -> Session:  # type: ignore[type-arg]
@@ -277,7 +232,6 @@ def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
             candidates_updated=candidates_updated,
             duration_seconds=duration,
         )
-        _notify_discord(result)
         return result
 
     except Exception as e:
