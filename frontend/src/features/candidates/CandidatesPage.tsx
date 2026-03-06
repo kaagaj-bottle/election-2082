@@ -24,7 +24,7 @@ export default function CandidatesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-nepali text-2xl font-bold text-ink-800 dark:text-ink-100">
-          उम्मेदवारहरू
+          {isNe ? 'उम्मेदवारहरू' : 'Candidates'}
         </h1>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           {isNe ? 'निर्वाचन उम्मेदवारहरू खोज्नुहोस्' : 'Browse and search election candidates'}
@@ -38,6 +38,12 @@ export default function CandidatesPage() {
       />
 
       <CandidateFilters filters={filters} setFilter={setFilter} clearFilters={clearFilters} />
+
+      {!isLoading && items.length > 0 && (
+        <p className="text-sm text-ink-500 dark:text-ink-400">
+          {isNe ? `${items.length} उम्मेदवार देखाउँदै` : `Showing ${items.length} candidates`}
+        </p>
+      )}
 
       <CandidateList items={items} isLoading={isLoading} error={error} />
 

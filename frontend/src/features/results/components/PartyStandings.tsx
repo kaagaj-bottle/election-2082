@@ -20,7 +20,52 @@ export function PartyStandings({ data, limit }: PartyStandingsProps) {
       <h2 className="mb-4 text-lg font-semibold text-ink-800 dark:text-ink-100">
         {isNe ? 'दलगत नतिजा' : 'Party Standings'}
       </h2>
-      <div className="overflow-x-auto">
+
+      {/* Mobile card layout */}
+      <div className="space-y-3 sm:hidden">
+        {rows.map((party) => (
+          <div
+            key={party.party_id}
+            className="rounded-lg border border-surface-100 p-3 dark:border-surface-800"
+          >
+            <div className="flex items-center gap-2">
+              <PartySymbol symbolImage={party.party_symbol_image} size="sm" />
+              <Link
+                to={`/candidates?party=${party.party_id}`}
+                className="flex-1 font-medium text-ink-800 hover:text-primary-600 hover:underline dark:text-ink-100 dark:hover:text-primary-400"
+              >
+                {isNe ? party.party_name_ne : party.party_name}
+              </Link>
+              <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
+                {party.total_seats}
+              </span>
+            </div>
+            <div className="mt-2 h-3 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
+              <div className="flex h-3">
+                <div
+                  className="h-3 bg-green-500 transition-all"
+                  style={{ width: `${(party.seats_won / maxSeats) * 100}%` }}
+                />
+                <div
+                  className="h-3 bg-amber-400 transition-all"
+                  style={{ width: `${(party.seats_leading / maxSeats) * 100}%` }}
+                />
+              </div>
+            </div>
+            <div className="mt-1.5 flex gap-4 text-xs">
+              <span className="text-green-600 dark:text-green-400">
+                {isNe ? 'जित' : 'Won'}: {party.seats_won}
+              </span>
+              <span className="text-amber-600 dark:text-amber-400">
+                {isNe ? 'अग्रणी' : 'Leading'}: {party.seats_leading}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop table layout */}
+      <div className="hidden overflow-x-auto sm:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-surface-200 dark:border-surface-700">
@@ -36,7 +81,7 @@ export function PartyStandings({ data, limit }: PartyStandingsProps) {
               <th className="px-3 py-2 text-right font-medium text-ink-500 dark:text-ink-400">
                 {isNe ? 'जम्मा' : 'Total'}
               </th>
-              <th className="hidden px-3 py-2 text-left font-medium text-ink-500 dark:text-ink-400 sm:table-cell">
+              <th className="px-3 py-2 text-left font-medium text-ink-500 dark:text-ink-400">
                 &nbsp;
               </th>
             </tr>
@@ -67,7 +112,7 @@ export function PartyStandings({ data, limit }: PartyStandingsProps) {
                 <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-ink-800 dark:text-ink-100">
                   {party.total_seats}
                 </td>
-                <td className="hidden w-40 px-3 py-2.5 sm:table-cell">
+                <td className="w-40 px-3 py-2.5">
                   <div className="h-3 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
                     <div className="flex h-3">
                       <div

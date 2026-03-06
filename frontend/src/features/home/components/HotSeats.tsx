@@ -61,10 +61,10 @@ export function HotSeats() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold text-ink-800 dark:text-ink-100">
+      <h2 className="mb-2 text-lg font-semibold text-ink-800 dark:text-ink-100">
         {isNe ? 'चर्चित सिट' : 'Hot Seats'}
       </h2>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-2">
         {hotSeats.data.map((seat) => {
           const topVotes = seat.candidates[0]?.votes_received ?? 0;
           const district = seat.constituency.district;

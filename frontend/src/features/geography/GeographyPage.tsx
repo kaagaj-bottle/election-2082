@@ -55,7 +55,7 @@ export default function GeographyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-nepali text-2xl font-bold text-ink-800 dark:text-ink-100">भूगोल</h1>
+        <h1 className="font-nepali text-2xl font-bold text-ink-800 dark:text-ink-100">{isNe ? 'भूगोल' : 'Geography'}</h1>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           {isNe
             ? 'प्रदेश, जिल्ला र निर्वाचन क्षेत्र हेर्नुहोस्'
@@ -64,7 +64,7 @@ export default function GeographyPage() {
       </div>
 
       {/* Breadcrumb */}
-      <nav className="flex flex-wrap items-center gap-2 text-sm">
+      <nav className="flex flex-wrap items-center gap-1 rounded-lg bg-surface-50 px-3 py-2 text-sm dark:bg-surface-800/50">
         <button
           onClick={() => {
             setSelectedProvince(null);
@@ -80,7 +80,9 @@ export default function GeographyPage() {
         </button>
         {selectedProvince && (
           <>
-            <span className="text-ink-400">/</span>
+            <svg className="h-4 w-4 text-ink-400 dark:text-ink-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
             <button
               onClick={() => setSelectedDistrict(null)}
               className={`rounded px-2 py-1 ${isNe ? 'font-nepali' : ''} ${
@@ -95,7 +97,9 @@ export default function GeographyPage() {
         )}
         {selectedDistrict && (
           <>
-            <span className="text-ink-400">/</span>
+            <svg className="h-4 w-4 text-ink-400 dark:text-ink-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+            </svg>
             <span
               className={`rounded px-2 py-1 font-medium text-primary-600 dark:text-primary-400 ${isNe ? 'font-nepali' : ''}`}
             >
@@ -146,7 +150,11 @@ export default function GeographyPage() {
           ) : districtDetail.error ? (
             <ErrorMessage message={districtDetail.error} onRetry={districtDetail.refetch} />
           ) : (
-            <ConstituencyList constituencies={districtDetail.data?.constituencies ?? []} />
+            <ConstituencyList
+              constituencies={districtDetail.data?.constituencies ?? []}
+              provinceId={selectedProvince?.id}
+              districtId={selectedDistrict?.id}
+            />
           )}
         </>
       )}

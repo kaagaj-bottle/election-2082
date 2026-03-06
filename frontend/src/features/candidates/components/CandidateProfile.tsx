@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { CandidateDetail } from '@/types/api';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -127,6 +128,18 @@ export function CandidateProfile({ candidate }: CandidateProfileProps) {
               <InfoRow label={n('PR क्रम', 'PR Rank')} value={candidate.closed_list_rank} />
             )}
           </dl>
+          <div className="mt-4 flex flex-wrap gap-3 border-t border-surface-100 pt-3 dark:border-surface-800">
+            <Link to={`/candidates?party=${candidate.party.id}`}
+              className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+              {n('दलका उम्मेदवारहरू', 'Party candidates')} →
+            </Link>
+            {candidate.constituency && (
+              <Link to={`/results/province/${candidate.constituency.district.province.id}`}
+                className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                {n('क्षेत्र नतिजा', 'Constituency results')} →
+              </Link>
+            )}
+          </div>
         </Card>
 
         {/* Personal Info */}

@@ -5,6 +5,7 @@ import { getNews } from '@/services/news';
 import { Spinner } from '@/components/ui/Spinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import type { NewsArticle } from '@/types/api';
 
 const SOURCE_COLORS: Record<string, 'blue' | 'indigo' | 'violet' | 'rose' | 'amber' | 'green' | 'teal' | 'gray'> = {
@@ -37,19 +38,24 @@ function ArticleCard({ article, lang }: { article: NewsArticle; lang: string }) 
       rel="noopener noreferrer"
       className="group flex flex-col overflow-hidden rounded-lg border border-surface-200 bg-white transition-shadow hover:shadow-md dark:border-surface-700 dark:bg-surface-900"
     >
-      {article.image_url && (
-        <div className="aspect-video w-full overflow-hidden bg-surface-100 dark:bg-surface-800">
+      <div className="aspect-video w-full overflow-hidden bg-surface-100 dark:bg-surface-800">
+        {article.image_url ? (
           <img
             src={article.image_url}
             alt=""
             className="h-full w-full object-cover transition-transform group-hover:scale-105"
             loading="lazy"
             onError={(e) => {
-              (e.currentTarget.parentElement as HTMLElement).style.display = 'none';
+              const parent = e.currentTarget.parentElement as HTMLElement;
+              parent.innerHTML = `<div class="flex h-full items-center justify-center text-sm font-medium text-ink-400 dark:text-ink-500">${article.source}</div>`;
             }}
           />
-        </div>
-      )}
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm font-medium text-ink-400 dark:text-ink-500">
+            {article.source}
+          </div>
+        )}
+      </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="mb-2 flex items-center gap-2">
           <Badge color={SOURCE_COLORS[article.source] ?? 'gray'}>{article.source}</Badge>
@@ -98,6 +104,7 @@ export default function NewsPage() {
   const { lang } = useLang();
   const isNe = lang === 'ne';
   const [activeSource, setActiveSource] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(12);
   const { data, isLoading, error, refetch } = useApi(
     (signal) => getNews(signal),
     [],
@@ -110,12 +117,14 @@ export default function NewsPage() {
   }, [refetch]);
 
   const filtered = activeSource ? data?.filter((a) => a.source === activeSource) : data;
+  const visible = filtered?.slice(0, visibleCount);
+  const hasMore = (filtered?.length ?? 0) > visibleCount;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-nepali text-2xl font-bold text-ink-800 dark:text-ink-100">
-          {isNe ? 'ताजा समाचार' : 'Imminent News'}
+          {isNe ? 'ताजा समाचार' : 'Latest News'}
         </h1>
         <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
           {isNe
@@ -150,6 +159,12 @@ export default function NewsPage() {
         ))}
       </div>
 
+      {!isLoading && filtered && filtered.length > 0 && (
+        <p className="text-sm text-ink-500 dark:text-ink-400">
+          {filtered.length} {isNe ? 'लेख' : 'articles'}
+        </p>
+      )}
+
       {isLoading && (
         <div className="flex items-center justify-center py-20">
           <Spinner size="lg" />
@@ -159,24 +174,30 @@ export default function NewsPage() {
       {error && <ErrorMessage message={error} onRetry={refetch} />}
 
       {!isLoading && !error && filtered && filtered.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <h3 className="text-lg font-medium text-ink-700 dark:text-ink-200">
-            {isNe ? 'कुनै समाचार भेटिएन' : 'No news articles found'}
-          </h3>
-          <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">
-            {isNe
-              ? 'पछि फेरि प्रयास गर्नुहोस्'
-              : 'Check back later for election-related news'}
-          </p>
-        </div>
+        <EmptyState
+          title={isNe ? 'कुनै समाचार भेटिएन' : 'No news articles found'}
+          description={isNe ? 'पछि फेरि प्रयास गर्नुहोस्' : 'Check back later for election-related news'}
+        />
       )}
 
-      {!isLoading && !error && filtered && filtered.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((article, i) => (
-            <ArticleCard key={`${article.link}-${i}`} article={article} lang={lang} />
-          ))}
-        </div>
+      {!isLoading && !error && visible && visible.length > 0 && (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((article, i) => (
+              <ArticleCard key={`${article.link}-${i}`} article={article} lang={lang} />
+            ))}
+          </div>
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={() => setVisibleCount((c) => c + 12)}
+                className="rounded-lg border border-surface-300 px-6 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-surface-100 dark:border-surface-600 dark:text-ink-200 dark:hover:bg-surface-800"
+              >
+                {isNe ? 'थप लोड गर्नुहोस्' : 'Load more'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

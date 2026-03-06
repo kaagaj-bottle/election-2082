@@ -5,9 +5,11 @@ import { useLang } from '@/contexts/language-context';
 
 interface ConstituencyListProps {
   constituencies: ConstituencyMinimal[];
+  provinceId?: number;
+  districtId?: number;
 }
 
-export function ConstituencyList({ constituencies }: ConstituencyListProps) {
+export function ConstituencyList({ constituencies, provinceId, districtId }: ConstituencyListProps) {
   const { lang } = useLang();
   const isNe = lang === 'ne';
 
@@ -26,7 +28,7 @@ export function ConstituencyList({ constituencies }: ConstituencyListProps) {
               {isNe ? 'उम्मेदवार' : 'Candidates'}
             </Link>
             <Link
-              to={`/results?constituency=${c.id}`}
+              to={`/results?province=${provinceId ?? ''}&district=${districtId ?? ''}&constituency=${c.id}`}
               className="text-green-600 hover:text-green-700 dark:text-green-400"
             >
               {isNe ? 'नतिजा' : 'Results'}

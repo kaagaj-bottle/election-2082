@@ -13,6 +13,7 @@ const GuidelinesPage = lazy(() => import('@/features/guidelines/GuidelinesPage')
 const ResultsPage = lazy(() => import('@/features/results/ResultsPage'));
 const ProvinceResultsPage = lazy(() => import('@/features/results/ProvinceResultsPage'));
 const NewsPage = lazy(() => import('@/features/news/NewsPage'));
+const MapPage = lazy(() => import('@/features/map/MapPage'));
 
 function PageLoader() {
   return (
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <NewsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: '/map',
+        element: (
+          <SuspenseWrapper>
+            <MapPage />
           </SuspenseWrapper>
         ),
       },

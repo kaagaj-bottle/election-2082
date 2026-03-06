@@ -4,22 +4,28 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 import { useLang } from '@/contexts/language-context';
 import { NavLink } from './NavLink';
+import { NavDropdown } from './NavDropdown';
 import { MobileNav } from './MobileNav';
 
-const links = [
+const mainLinks = [
   { to: '/', label: 'Home', labelNe: 'गृह' },
   { to: '/results', label: 'Results', labelNe: 'नतिजा' },
   { to: '/candidates', label: 'Candidates', labelNe: 'उम्मेदवार' },
   { to: '/parties', label: 'Parties', labelNe: 'दल' },
+  { to: '/news', label: 'News', labelNe: 'समाचार' },
+  { to: '/map', label: 'Map', labelNe: 'नक्सा' },
+];
+
+const moreLinks = [
   { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },
   { to: '/stats', label: 'Stats', labelNe: 'तथ्याङ्क' },
   { to: '/guidelines', label: 'Guidelines', labelNe: 'निर्देशिका' },
-  { to: '/news', label: 'News', labelNe: 'समाचार' },
 ];
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { lang } = useLang();
+  const isNe = lang === 'ne';
 
   return (
     <>
@@ -32,11 +38,15 @@ export function Header() {
           </Link>
 
           <nav className="hidden items-center gap-1 md:flex">
-            {links.map((link) => (
+            {mainLinks.map((link) => (
               <NavLink key={link.to} to={link.to}>
-                {lang === 'ne' ? link.labelNe : link.label}
+                {isNe ? link.labelNe : link.label}
               </NavLink>
             ))}
+            <NavDropdown
+              label={isNe ? 'थप' : 'More'}
+              items={moreLinks.map((l) => ({ to: l.to, label: isNe ? l.labelNe : l.label }))}
+            />
           </nav>
 
           <div className="flex items-center gap-1">

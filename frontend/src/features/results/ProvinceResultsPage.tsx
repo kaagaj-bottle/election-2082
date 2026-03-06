@@ -135,9 +135,11 @@ export default function ProvinceResultsPage() {
                       }`}
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="truncate font-medium text-ink-800 dark:text-ink-100">
-                          {isNe ? c.name_ne : c.name}
-                        </div>
+                        <Link to={`/candidates/${c.id}`} className="hover:text-primary-600 hover:underline dark:hover:text-primary-400">
+                          <div className="truncate font-medium text-ink-800 dark:text-ink-100">
+                            {isNe ? c.name_ne : c.name}
+                          </div>
+                        </Link>
                         <div className="flex items-center gap-1 text-xs text-ink-500 dark:text-ink-400">
                           <PartySymbol symbolImage={c.party.symbol_image} size="xs" />
                           <span className="truncate">{isNe ? c.party.name_ne : c.party.name}</span>

@@ -16,6 +16,7 @@ const links = [
   { to: '/stats', label: 'Stats', labelNe: 'तथ्याङ्क' },
   { to: '/guidelines', label: 'Guidelines', labelNe: 'निर्देशिका' },
   { to: '/news', label: 'News', labelNe: 'समाचार' },
+  { to: '/map', label: 'Map', labelNe: 'नक्सा' },
 ];
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {

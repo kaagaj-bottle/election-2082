@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useApi } from '@/hooks/use-api';
 import { getProvinces } from '@/services/provinces';
 import { getProvince } from '@/services/provinces';
@@ -6,9 +7,11 @@ import { getDistrict } from '@/services/districts';
 import { getConstituencyResults } from '@/services/results';
 import { useLang } from '@/contexts/language-context';
 import { Select } from '@/components/ui/Select';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import { Card } from '@/components/ui/Card';
 import { Spinner } from '@/components/ui/Spinner';
 import { Badge } from '@/components/ui/Badge';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PartySymbol } from '@/components/shared/PartySymbol';
 import type {
   CursorPage,
@@ -21,10 +24,11 @@ import type {
 export function ConstituencyResults() {
   const { lang } = useLang();
   const isNe = lang === 'ne';
+  const [searchParams] = useSearchParams();
 
-  const [provinceId, setProvinceId] = useState('');
-  const [districtId, setDistrictId] = useState('');
-  const [constituencyId, setConstituencyId] = useState('');
+  const [provinceId, setProvinceId] = useState(() => searchParams.get('province') ?? '');
+  const [districtId, setDistrictId] = useState(() => searchParams.get('district') ?? '');
+  const [constituencyId, setConstituencyId] = useState(() => searchParams.get('constituency') ?? '');
 
   const provinces = useApi<CursorPage<Province>>((signal) => getProvinces(signal), []);
 
@@ -98,17 +102,17 @@ export function ConstituencyResults() {
       </h2>
 
       <div className="mb-6 grid gap-3 sm:grid-cols-3">
-        <Select
+        <SearchableSelect
           options={provinceOptions}
           placeholder={isNe ? '-- प्रदेश --' : '-- Province --'}
           value={provinceId}
-          onChange={(e) => setProvinceId(e.target.value)}
+          onChange={setProvinceId}
         />
-        <Select
+        <SearchableSelect
           options={districtOptions}
           placeholder={isNe ? '-- जिल्ला --' : '-- District --'}
           value={districtId}
-          onChange={(e) => setDistrictId(e.target.value)}
+          onChange={setDistrictId}
           disabled={!provinceId}
         />
         <Select
@@ -162,9 +166,11 @@ export function ConstituencyResults() {
                       {i + 1}
                     </td>
                     <td className="px-3 py-2.5">
-                      <div className="font-medium text-ink-800 dark:text-ink-100">
-                        {isNe ? c.name_ne : c.name}
-                      </div>
+                      <Link to={`/candidates/${c.id}`} className="hover:text-primary-600 hover:underline dark:hover:text-primary-400">
+                        <div className="font-medium text-ink-800 dark:text-ink-100">
+                          {isNe ? c.name_ne : c.name}
+                        </div>
+                      </Link>
                     </td>
                     <td className="px-3 py-2.5 text-ink-600 dark:text-ink-300">
                       <div className="flex items-center gap-2">
@@ -203,9 +209,9 @@ export function ConstituencyResults() {
       )}
 
       {candidates && candidates.length === 0 && (
-        <p className="py-10 text-center text-sm text-ink-400">
-          {isNe ? 'यस क्षेत्रको नतिजा उपलब्ध छैन।' : 'No results available for this constituency.'}
-        </p>
+        <EmptyState
+          title={isNe ? 'यस क्षेत्रको नतिजा उपलब्ध छैन' : 'No results available for this constituency'}
+        />
       )}
     </div>
   );

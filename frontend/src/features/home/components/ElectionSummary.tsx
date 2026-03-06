@@ -22,7 +22,7 @@ export function ElectionSummary({ election }: ElectionSummaryProps) {
       <p className={`mt-1 text-sm text-ink-500 dark:text-ink-400 ${!isNe ? 'font-nepali' : ''}`}>
         {secondary}
       </p>
-      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div>
           <p className="text-xs text-ink-400 dark:text-ink-500">
             {isNe ? 'निर्वाचन मिति' : 'Election Date'}

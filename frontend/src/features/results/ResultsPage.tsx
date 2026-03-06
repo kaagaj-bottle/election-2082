@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { getPartyTally, getProvinceSummary } from '@/services/results';
 import { useLang } from '@/contexts/language-context';
-import { Spinner } from '@/components/ui/Spinner';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LastUpdatedBadge } from './components/LastUpdatedBadge';
 import { PartyStandings } from './components/PartyStandings';
@@ -28,8 +28,36 @@ export default function ResultsPage() {
 
   if (partyTally.isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Spinner size="lg" />
+      <div className="space-y-8">
+        <div>
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="mt-2 h-4 w-72" />
+        </div>
+        <div className="rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+          <Skeleton className="mb-4 h-5 w-32" />
+          {Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="flex items-center justify-between border-b border-surface-100 py-3 last:border-0 dark:border-surface-800">
+              <Skeleton className="h-4 w-40" />
+              <div className="flex gap-4">
+                <Skeleton className="h-4 w-8" />
+                <Skeleton className="h-4 w-8" />
+                <Skeleton className="h-4 w-8" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 7 }, (_, i) => (
+            <div key={i} className="rounded-lg border border-surface-200 p-4 dark:border-surface-700">
+              <Skeleton className="h-5 w-32" />
+              <div className="mt-3 space-y-2">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -50,6 +78,22 @@ export default function ResultsPage() {
               ? 'प्रतिनिधि सभा निर्वाचन २०८२ — प्रत्यक्ष (FPTP)'
               : 'House of Representatives Election 2082 — FPTP'}
           </p>
+          {partyTally.data && (() => {
+            const declared = partyTally.data.reduce((s, p) => s + p.seats_won, 0);
+            return (
+              <div className="mt-2 flex items-center gap-2">
+                <div className="h-2 w-32 overflow-hidden rounded-full bg-surface-200 dark:bg-surface-700">
+                  <div
+                    className="h-2 rounded-full bg-green-500 transition-all"
+                    style={{ width: `${(declared / 165) * 100}%` }}
+                  />
+                </div>
+                <span className="text-sm font-medium tabular-nums text-ink-600 dark:text-ink-300">
+                  {declared} / 165 {isNe ? 'सिट घोषित' : 'seats declared'}
+                </span>
+              </div>
+            );
+          })()}
         </div>
         <LastUpdatedBadge />
       </div>

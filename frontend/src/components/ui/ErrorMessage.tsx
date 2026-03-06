@@ -1,4 +1,5 @@
 import { Button } from './Button';
+import { useLang } from '@/contexts/language-context';
 
 interface ErrorMessageProps {
   message: string;
@@ -6,6 +7,9 @@ interface ErrorMessageProps {
 }
 
 export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
+  const { lang } = useLang();
+  const isNe = lang === 'ne';
+
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <svg
@@ -21,11 +25,11 @@ export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
           d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
         />
       </svg>
-      <h3 className="text-lg font-medium text-ink-700 dark:text-ink-200">Something went wrong</h3>
+      <h3 className="text-lg font-medium text-ink-700 dark:text-ink-200">{isNe ? 'केही गलत भयो' : 'Something went wrong'}</h3>
       <p className="mt-1 text-sm text-ink-500 dark:text-ink-400">{message}</p>
       {onRetry && (
         <Button variant="secondary" size="sm" onClick={onRetry} className="mt-4">
-          Try again
+          {isNe ? 'पुनः प्रयास गर्नुहोस्' : 'Try again'}
         </Button>
       )}
     </div>
