@@ -187,7 +187,9 @@ def _update_candidates(data: list[dict[str, Any]], election: Election) -> int:
 
 def _notify_discord(result: FetchResult) -> None:
     """Send a Discord webhook notification after a successful fetch."""
-    webhook_url = os.environ.get("DISCORD_WEBHOOK_URL", "")
+    webhook_url = os.environ.get(
+        "DISCORD_WEBHOOK_URL",
+    )
     if not webhook_url:
         return
     try:
@@ -201,7 +203,10 @@ def _notify_discord(result: FetchResult) -> None:
         req = urllib.request.Request(
             webhook_url,
             data=payload,
-            headers={"Content-Type": "application/json"},
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "Election2082-Bot",
+            },
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=10):
@@ -260,8 +265,7 @@ def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
             candidates_updated=candidates_updated,
             duration_seconds=duration,
         )
-        if candidates_updated > 0:
-            _notify_discord(result)
+        _notify_discord(result)
         return result
 
     except Exception as e:

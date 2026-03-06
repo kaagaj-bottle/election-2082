@@ -16,3 +16,17 @@ DATABASES = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        "app.apps.candidates": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+}
