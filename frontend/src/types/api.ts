@@ -153,6 +153,31 @@ export interface NewsArticle {
   image_url: string | null;
 }
 
+// Results
+export interface PartyTally {
+  party_id: number;
+  party_name_ne: string;
+  party_name: string;
+  seats_won: number;
+  total_votes: number;
+  candidate_count: number;
+}
+
+export interface ProvinceSummary {
+  province_id: number;
+  province_name: string;
+  province_name_ne: string;
+  total_votes: number;
+  total_candidates: number;
+  total_constituencies: number;
+}
+
+export interface LastUpdated {
+  last_updated: string | null;
+  records_fetched: number;
+  candidates_updated: number;
+}
+
 export interface CandidateDetail {
   id: number;
   source_id: number;

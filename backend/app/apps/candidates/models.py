@@ -89,3 +89,20 @@ class Candidate(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name_ne} ({self.election_type})"
+
+
+class ResultFetchLog(models.Model):
+    fetched_at = models.DateTimeField(auto_now_add=True)
+    success = models.BooleanField()
+    source_url = models.URLField(max_length=500)
+    records_fetched = models.PositiveIntegerField(default=0)
+    candidates_updated = models.PositiveIntegerField(default=0)
+    error_message = models.TextField(blank=True)
+    duration_seconds = models.FloatField(default=0)
+
+    class Meta:
+        ordering = ["-fetched_at"]
+
+    def __str__(self) -> str:
+        status = "OK" if self.success else "FAIL"
+        return f"{self.fetched_at:%Y-%m-%d %H:%M} [{status}] {self.candidates_updated} updated"

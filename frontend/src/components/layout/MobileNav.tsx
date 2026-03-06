@@ -9,6 +9,7 @@ interface MobileNavProps {
 
 const links = [
   { to: '/', label: 'Home', labelNe: 'गृह' },
+  { to: '/results', label: 'Results', labelNe: 'नतिजा' },
   { to: '/candidates', label: 'Candidates', labelNe: 'उम्मेदवार' },
   { to: '/parties', label: 'Parties', labelNe: 'दल' },
   { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },

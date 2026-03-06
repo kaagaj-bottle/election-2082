@@ -1,12 +1,15 @@
+import { Link } from 'react-router-dom';
 import { useApi } from '@/hooks/use-api';
 import { getElections } from '@/services/elections';
 import { getElection } from '@/services/elections';
 import { getProvinces } from '@/services/provinces';
 import { getParties } from '@/services/parties';
+import { getPartyTally } from '@/services/results';
 import { useLang } from '@/contexts/language-context';
-import type { CursorPage, ElectionListItem, ElectionDetail, Province, Party } from '@/types/api';
+import type { CursorPage, ElectionListItem, ElectionDetail, Province, Party, PartyTally } from '@/types/api';
 import { Spinner } from '@/components/ui/Spinner';
 import { ErrorMessage } from '@/components/ui/ErrorMessage';
+import { LastUpdatedBadge } from '@/features/results/components/LastUpdatedBadge';
 import { ElectionSummary } from './components/ElectionSummary';
 import { StatsGrid } from './components/StatsGrid';
 import { QuickLinks } from './components/QuickLinks';
@@ -40,6 +43,8 @@ export default function HomePage() {
     [],
   );
 
+  const partyTally = useApi<PartyTally[]>((signal) => getPartyTally(signal), []);
+
   if (elections.isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -63,12 +68,45 @@ export default function HomePage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800 dark:border-primary-700 dark:bg-primary-900 dark:text-primary-200">
-        <span className="mr-2 font-medium">ℹ</span>
-        {isNe
-          ? 'निर्वाचनको समयमा यो साइटले प्रत्यक्ष (लाइभ) नतिजा प्रदर्शन गर्नेछ।'
-          : 'When elections take place, this site will show live results.'}
-      </div>
+      {partyTally.data && partyTally.data.some((p) => p.total_votes > 0) ? (
+        <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-900/20">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-semibold text-ink-800 dark:text-ink-100">
+              {isNe ? 'प्रत्यक्ष नतिजा' : 'Live Results'}
+            </h2>
+            <LastUpdatedBadge />
+          </div>
+          <div className="space-y-1.5">
+            {partyTally.data.slice(0, 5).map((p) => (
+              <div key={p.party_id} className="flex items-center justify-between text-sm">
+                <span className="text-ink-700 dark:text-ink-200">
+                  {isNe ? p.party_name_ne : p.party_name}
+                </span>
+                <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
+                  {p.seats_won} {isNe ? 'सिट' : 'seats'}
+                </span>
+              </div>
+            ))}
+          </div>
+          <Link
+            to="/results"
+            className="mt-3 inline-block text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
+          >
+            {isNe ? 'पूर्ण नतिजा हेर्नुहोस् →' : 'View full results →'}
+          </Link>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-primary-200 bg-primary-50 px-4 py-3 text-sm text-primary-800 dark:border-primary-700 dark:bg-primary-900 dark:text-primary-200">
+          <span className="mr-2 font-medium">ℹ</span>
+          {isNe
+            ? 'मतगणना जारी छ। नतिजा हेर्नुहोस्।'
+            : 'Vote counting is underway. Check results page for updates.'}
+          {' '}
+          <Link to="/results" className="font-medium underline">
+            {isNe ? 'नतिजा' : 'Results'}
+          </Link>
+        </div>
+      )}
 
       {electionDetail.data && <ElectionSummary election={electionDetail.data} />}
 

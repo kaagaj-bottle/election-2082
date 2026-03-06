@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections import defaultdict
+
 from django.db.models import (
     Avg,
     Case,
@@ -7,6 +9,7 @@ from django.db.models import (
     Max,
     Min,
     QuerySet,
+    Sum,
     Value,
     When,
 )
@@ -16,7 +19,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from app.apps.candidates.filters import CandidateFilterSet
-from app.apps.candidates.models import Candidate, ElectionType
+from app.apps.candidates.models import Candidate, ElectionType, ResultFetchLog
 from app.apps.candidates.serializers import CandidateDetailSerializer, CandidateListSerializer
 
 
@@ -145,3 +148,140 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
         }
 
         return Response(data)
+
+    # --- Live Result Endpoints ---
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="results/constituency/(?P<constituency_id>[0-9]+)",
+    )
+    def results_constituency(self, request: Request, constituency_id: str = "") -> Response:
+        """Candidates in a constituency sorted by votes desc (no pagination)."""
+        candidates = (
+            Candidate.objects.filter(
+                election_type=ElectionType.FPTP,
+                constituency_id=int(constituency_id),
+            )
+            .select_related("party", "constituency__district__province")
+            .order_by("-votes_received", "id")
+        )
+        serializer = CandidateListSerializer(candidates, many=True, context={"request": request})
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="results/party-tally", pagination_class=None)
+    def results_party_tally(self, request: Request) -> Response:
+        """Party seat count + total votes.
+        A 'seat won' = candidate with max votes in their constituency (where votes > 0).
+        """
+        qs = Candidate.objects.filter(election_type=ElectionType.FPTP)
+
+        # Find winner of each constituency by iterating ordered candidates
+        constituency_winners: dict[int, list[int]] = {}
+        const_candidates = (
+            qs.filter(votes_received__gt=0)
+            .values("constituency_id", "party_id", "votes_received")
+            .order_by("constituency_id", "-votes_received")
+        )
+        current_const = None
+        max_votes_in_const = 0
+        for row in const_candidates:
+            cid = row["constituency_id"]
+            if cid != current_const:
+                current_const = cid
+                max_votes_in_const = row["votes_received"]
+                constituency_winners[cid] = [row["party_id"]]
+            elif row["votes_received"] == max_votes_in_const:
+                constituency_winners[cid].append(row["party_id"])
+
+        # Count seats per party (ties = no seat awarded)
+        seats_won: dict[int, int] = defaultdict(int)
+        for winners_list in constituency_winners.values():
+            if len(winners_list) == 1:
+                seats_won[winners_list[0]] += 1
+
+        # Get party totals via aggregation
+        party_rows = list(
+            qs.values("party_id", "party__name_ne", "party__name")
+            .annotate(
+                total_votes=Sum("votes_received"),
+                candidate_count=Count("id"),
+            )
+            .order_by("-total_votes")
+        )
+
+        result = []
+        for row in party_rows:
+            pid = row["party_id"]
+            result.append(
+                {
+                    "party_id": pid,
+                    "party_name_ne": row["party__name_ne"],
+                    "party_name": row["party__name"],
+                    "seats_won": seats_won.get(pid, 0),
+                    "total_votes": row["total_votes"],
+                    "candidate_count": row["candidate_count"],
+                }
+            )
+
+        result.sort(key=lambda r: (-r["seats_won"], -r["total_votes"]))  # type: ignore[reportUnknownLambdaType]
+        return Response(result)
+
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="results/province-summary",
+        pagination_class=None,
+    )
+    def results_province_summary(self, request: Request) -> Response:
+        """Per-province vote totals and constituency counts."""
+        qs = Candidate.objects.filter(
+            election_type=ElectionType.FPTP,
+            constituency__isnull=False,
+        )
+        province_data = list(
+            qs.values(
+                "constituency__district__province__id",
+                "constituency__district__province__name",
+                "constituency__district__province__name_ne",
+            )
+            .annotate(
+                total_votes=Sum("votes_received"),
+                total_candidates=Count("id"),
+                total_constituencies=Count("constituency_id", distinct=True),
+            )
+            .order_by("constituency__district__province__id")
+        )
+
+        result = [
+            {
+                "province_id": row["constituency__district__province__id"],
+                "province_name": row["constituency__district__province__name"],
+                "province_name_ne": row["constituency__district__province__name_ne"],
+                "total_votes": row["total_votes"],
+                "total_candidates": row["total_candidates"],
+                "total_constituencies": row["total_constituencies"],
+            }
+            for row in province_data
+        ]
+        return Response(result)
+
+    @action(detail=False, methods=["get"], url_path="results/last-updated", pagination_class=None)
+    def results_last_updated(self, request: Request) -> Response:
+        """Last successful fetch timestamp from ResultFetchLog."""
+        last_log = ResultFetchLog.objects.filter(success=True).first()
+        if last_log:
+            return Response(
+                {
+                    "last_updated": last_log.fetched_at.isoformat(),
+                    "records_fetched": last_log.records_fetched,
+                    "candidates_updated": last_log.candidates_updated,
+                }
+            )
+        return Response(
+            {
+                "last_updated": None,
+                "records_fetched": 0,
+                "candidates_updated": 0,
+            }
+        )
