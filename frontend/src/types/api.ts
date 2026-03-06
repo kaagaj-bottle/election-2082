@@ -178,6 +178,13 @@ export interface HotSeat {
   candidates: CandidateListItem[];
 }
 
+export interface ProvinceConstituencyResult {
+  constituency: Constituency;
+  total_votes: number;
+  candidates_count: number;
+  top_candidates: CandidateListItem[];
+}
+
 export interface LastUpdated {
   last_updated: string | null;
   records_fetched: number;

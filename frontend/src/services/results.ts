@@ -1,5 +1,12 @@
 import { apiGet } from '@/lib/api-client';
-import type { CandidateListItem, HotSeat, PartyTally, ProvinceSummary, LastUpdated } from '@/types/api';
+import type {
+  CandidateListItem,
+  HotSeat,
+  PartyTally,
+  ProvinceConstituencyResult,
+  ProvinceSummary,
+  LastUpdated,
+} from '@/types/api';
 
 export function getConstituencyResults(constituencyId: number, signal?: AbortSignal) {
   return apiGet<CandidateListItem[]>(
@@ -19,6 +26,14 @@ export function getProvinceSummary(signal?: AbortSignal) {
 
 export function getHotSeats(signal?: AbortSignal) {
   return apiGet<HotSeat[]>('/candidates/results/hotseats/', undefined, signal);
+}
+
+export function getProvinceResults(provinceId: number, signal?: AbortSignal) {
+  return apiGet<ProvinceConstituencyResult[]>(
+    `/candidates/results/province/${provinceId}/`,
+    undefined,
+    signal,
+  );
 }
 
 export function getLastUpdated(signal?: AbortSignal) {

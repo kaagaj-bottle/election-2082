@@ -290,6 +290,62 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
             }
         )
 
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path="results/province/(?P<province_id>[0-9]+)",
+        pagination_class=None,
+    )
+    def results_province(self, request: Request, province_id: str = "") -> Response:
+        """Top 3 candidates per constituency for a given province."""
+        qs = (
+            Candidate.objects.filter(
+                election_type=ElectionType.FPTP,
+                constituency__district__province_id=int(province_id),
+            )
+            .select_related("party", "constituency__district__province")
+            .order_by(
+                "constituency__district__name",
+                "constituency__number",
+                "-votes_received",
+                "id",
+            )
+        )
+
+        # Group by constituency, keep top 3
+        grouped: dict[int, dict[str, object]] = {}
+        for candidate in qs:
+            cid = candidate.constituency_id
+            assert cid is not None
+            if cid not in grouped:
+                grouped[cid] = {
+                    "constituency": ConstituencySerializer(
+                        candidate.constituency, context={"request": request}
+                    ).data,
+                    "total_votes": 0,
+                    "candidates_count": 0,
+                    "top_candidates": [],
+                }
+            entry = grouped[cid]
+            entry["candidates_count"] = int(entry["candidates_count"]) + 1  # type: ignore[arg-type]
+            entry["total_votes"] = int(entry["total_votes"]) + candidate.votes_received  # type: ignore[arg-type]
+            top = entry["top_candidates"]
+            assert isinstance(top, list)
+            if len(top) < 3:
+                top.append(
+                    CandidateListSerializer(candidate, context={"request": request}).data
+                )
+
+        # Sort by district name, constituency number
+        result = sorted(
+            grouped.values(),
+            key=lambda x: (
+                x["constituency"]["district"]["name"],  # type: ignore[index]
+                x["constituency"]["number"],  # type: ignore[index]
+            ),
+        )
+        return Response(result)
+
     @action(detail=False, methods=["get"], url_path="results/hotseats", pagination_class=None)
     def results_hotseats(self, request: Request) -> Response:
         """Return full constituency results for featured candidates."""

@@ -11,6 +11,7 @@ const GeographyPage = lazy(() => import('@/features/geography/GeographyPage'));
 const StatsPage = lazy(() => import('@/features/stats/StatsPage'));
 const GuidelinesPage = lazy(() => import('@/features/guidelines/GuidelinesPage'));
 const ResultsPage = lazy(() => import('@/features/results/ResultsPage'));
+const ProvinceResultsPage = lazy(() => import('@/features/results/ProvinceResultsPage'));
 const NewsPage = lazy(() => import('@/features/news/NewsPage'));
 
 function PageLoader() {
@@ -42,6 +43,14 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <ResultsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: '/results/province/:provinceId',
+        element: (
+          <SuspenseWrapper>
+            <ProvinceResultsPage />
           </SuspenseWrapper>
         ),
       },
