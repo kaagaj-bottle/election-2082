@@ -14,7 +14,9 @@ class CandidatesConfig(AppConfig):
         is_run_main = os.environ.get("RUN_MAIN") == "true"
         is_gunicorn = "gunicorn" in sys.modules
 
-        if (is_runserver and is_run_main) or is_gunicorn:
+        is_noreload = "--noreload" in sys.argv
+
+        if (is_runserver and (is_run_main or is_noreload)) or is_gunicorn:
             from app.apps.candidates.scheduler import start_result_scheduler
 
             start_result_scheduler()
