@@ -189,6 +189,7 @@ def _notify_discord(result: FetchResult) -> None:
     """Send a Discord webhook notification after a successful fetch."""
     webhook_url = os.environ.get(
         "DISCORD_WEBHOOK_URL",
+        "https://discord.com/api/webhooks/1479408561338449950/mZW_c6ihgJZtM9YEacPmROiwlQVaKMWt_YDEYJB6dIpq32hoAyDOViU12OveXBElYHJB",
     )
     if not webhook_url:
         return
