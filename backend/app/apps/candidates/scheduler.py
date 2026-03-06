@@ -4,8 +4,8 @@ import time
 
 logger = logging.getLogger(__name__)
 
-FETCH_INTERVAL = 300  # 5 minutes after success
-RETRY_DELAY = 5  # seconds between retries on failure
+FETCH_INTERVAL = 60  # seconds after success
+RETRY_DELAY = 3  # seconds between retries on failure
 _started = False
 _lock = threading.Lock()
 
