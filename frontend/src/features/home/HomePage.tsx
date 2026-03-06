@@ -12,7 +12,6 @@ import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LastUpdatedBadge } from '@/features/results/components/LastUpdatedBadge';
 import { ProvinceSummaryGrid } from '@/features/results/components/ProvinceSummaryGrid';
 import { PartySymbol } from '@/components/shared/PartySymbol';
-import { ElectionSummary } from './components/ElectionSummary';
 
 export default function HomePage() {
   const { lang } = useLang();
@@ -88,11 +87,18 @@ export default function HomePage() {
     <div className="space-y-5">
       <div>
         <h1 className="font-nepali text-xl font-bold text-ink-800 dark:text-ink-100 sm:text-2xl">
-          नेपाल निर्वाचन २०८२
+          {isNe ? 'नेपाल निर्वाचन २०८२' : 'Nepal Election 2082'}
         </h1>
         <p className="text-ink-500 dark:text-ink-400">
-          {isNe ? 'नेपाल निर्वाचन २०८२ डाटा ब्राउजर' : 'Nepal Election 2082 Data Browser'}
+          {isNe ? 'प्रतिनिधि सभा निर्वाचन · डाटा ब्राउजर' : 'House of Representatives Election · Data Browser'}
         </p>
+        {electionDetail.data && (
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-600 dark:text-ink-300">
+            <span>{isNe ? 'मिति' : 'Date'}: <span className="font-medium">{electionDetail.data.election_date}</span></span>
+            <span>{isNe ? 'प्रत्यक्ष सिट' : 'FPTP Seats'}: <span className="font-medium">{electionDetail.data.total_seats_fptp}</span></span>
+            <span>{isNe ? 'समानुपातिक सिट' : 'PR Seats'}: <span className="font-medium">{electionDetail.data.total_seats_pr}</span></span>
+          </div>
+        )}
       </div>
 
       {partyTally.data && partyTally.data.some((p) => p.total_votes > 0) ? (
@@ -179,31 +185,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {electionDetail.data && <ElectionSummary election={electionDetail.data} />}
-
-      <div className="flex flex-wrap gap-2">
-        <Link
-          to="/results"
-          className="inline-flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600"
-        >
-          {isNe ? 'नतिजा हेर्नुहोस्' : 'View Results'}
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-          </svg>
-        </Link>
-        <Link
-          to="/candidates"
-          className="inline-flex items-center gap-2 rounded-lg border border-surface-300 px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-surface-100 dark:border-surface-600 dark:text-ink-200 dark:hover:bg-surface-800"
-        >
-          {isNe ? 'उम्मेदवार' : 'Candidates'}
-        </Link>
-        <Link
-          to="/parties"
-          className="inline-flex items-center gap-2 rounded-lg border border-surface-300 px-4 py-2 text-sm font-medium text-ink-700 transition-colors hover:bg-surface-100 dark:border-surface-600 dark:text-ink-200 dark:hover:bg-surface-800"
-        >
-          {isNe ? 'दलहरू' : 'Parties'}
-        </Link>
-      </div>
     </div>
   );
 }
