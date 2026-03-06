@@ -172,6 +172,12 @@ export interface ProvinceSummary {
   total_constituencies: number;
 }
 
+export interface HotSeat {
+  candidate_name: string;
+  constituency: Constituency;
+  candidates: CandidateListItem[];
+}
+
 export interface LastUpdated {
   last_updated: string | null;
   records_fetched: number;

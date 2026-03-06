@@ -12,6 +12,7 @@ import { ErrorMessage } from '@/components/ui/ErrorMessage';
 import { LastUpdatedBadge } from '@/features/results/components/LastUpdatedBadge';
 import { ElectionSummary } from './components/ElectionSummary';
 import { StatsGrid } from './components/StatsGrid';
+import { HotSeats } from './components/HotSeats';
 import { QuickLinks } from './components/QuickLinks';
 
 export default function HomePage() {
@@ -107,6 +108,8 @@ export default function HomePage() {
           </Link>
         </div>
       )}
+
+      <HotSeats />
 
       {electionDetail.data && <ElectionSummary election={electionDetail.data} />}
 
