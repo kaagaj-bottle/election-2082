@@ -150,9 +150,11 @@ export function ConstituencyResults() {
                   <tr
                     key={c.id}
                     className={`border-b border-surface-100 last:border-0 dark:border-surface-800 ${
-                      i === 0 && topVotes > 0
+                      c.status === 'Elected'
                         ? 'bg-green-50 dark:bg-green-900/10'
-                        : ''
+                        : i === 0 && topVotes > 0
+                          ? 'bg-amber-50 dark:bg-amber-900/10'
+                          : ''
                     }`}
                   >
                     <td className="py-2.5 pr-3 tabular-nums text-ink-500 dark:text-ink-400">
@@ -170,11 +172,15 @@ export function ConstituencyResults() {
                       <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
                         {c.votes_received.toLocaleString()}
                       </span>
-                      {i === 0 && topVotes > 0 && (
+                      {c.status === 'Elected' ? (
                         <Badge color="green">
+                          {isNe ? 'निर्वाचित' : 'Elected'}
+                        </Badge>
+                      ) : i === 0 && topVotes > 0 ? (
+                        <Badge color="amber">
                           {isNe ? 'अग्रणी' : 'Leading'}
                         </Badge>
-                      )}
+                      ) : null}
                     </td>
                   </tr>
                 ))}

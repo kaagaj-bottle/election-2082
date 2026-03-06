@@ -176,12 +176,19 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
     @action(detail=False, methods=["get"], url_path="results/party-tally", pagination_class=None)
     def results_party_tally(self, request: Request) -> Response:
         """Party seat count + total votes.
-        A 'seat won' = candidate with max votes in their constituency (where votes > 0).
+        - seats_won = candidates with status 'Elected'
+        - seats_leading = leading in constituency (max votes, no tie) but not yet elected
         """
         qs = Candidate.objects.filter(election_type=ElectionType.FPTP)
 
-        # Find winner of each constituency by iterating ordered candidates
-        constituency_winners: dict[int, list[int]] = {}
+        # Count officially elected seats per party
+        seats_won: dict[int, int] = defaultdict(int)
+        elected = qs.filter(status="Elected").values_list("party_id", flat=True)
+        for pid in elected:
+            seats_won[pid] += 1
+
+        # Find leading candidate per constituency (max votes, no tie)
+        constituency_leaders: dict[int, list[int]] = {}
         const_candidates = (
             qs.filter(votes_received__gt=0)
             .values("constituency_id", "party_id", "votes_received")
@@ -194,15 +201,18 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
             if cid != current_const:
                 current_const = cid
                 max_votes_in_const = row["votes_received"]
-                constituency_winners[cid] = [row["party_id"]]
+                constituency_leaders[cid] = [row["party_id"]]
             elif row["votes_received"] == max_votes_in_const:
-                constituency_winners[cid].append(row["party_id"])
+                constituency_leaders[cid].append(row["party_id"])
 
-        # Count seats per party (ties = no seat awarded)
-        seats_won: dict[int, int] = defaultdict(int)
-        for winners_list in constituency_winners.values():
-            if len(winners_list) == 1:
-                seats_won[winners_list[0]] += 1
+        # seats_leading = leading but not yet elected (ties excluded)
+        seats_leading: dict[int, int] = defaultdict(int)
+        elected_set = set(
+            qs.filter(status="Elected").values_list("constituency_id", flat=True)
+        )
+        for cid, leaders in constituency_leaders.items():
+            if len(leaders) == 1 and cid not in elected_set:
+                seats_leading[leaders[0]] += 1
 
         # Get party totals via aggregation
         party_rows = list(
@@ -217,18 +227,22 @@ class CandidateViewSet(ReadOnlyModelViewSet[Candidate]):
         result = []
         for row in party_rows:
             pid = row["party_id"]
+            won = seats_won.get(pid, 0)
+            leading = seats_leading.get(pid, 0)
             result.append(
                 {
                     "party_id": pid,
                     "party_name_ne": row["party__name_ne"],
                     "party_name": row["party__name"],
-                    "seats_won": seats_won.get(pid, 0),
+                    "seats_won": won,
+                    "seats_leading": leading,
+                    "total_seats": won + leading,
                     "total_votes": row["total_votes"],
                     "candidate_count": row["candidate_count"],
                 }
             )
 
-        result.sort(key=lambda r: (-r["seats_won"], -r["total_votes"]))  # type: ignore[reportUnknownLambdaType]
+        result.sort(key=lambda r: (-r["total_seats"], -r["total_votes"]))  # type: ignore[reportUnknownLambdaType]
         return Response(result)
 
     @action(

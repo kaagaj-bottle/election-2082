@@ -157,7 +157,7 @@ def _update_candidates(data: list[dict[str, Any]], election: Election) -> int:
             continue
         source_id = int(candidate_id)
         votes = int(row.get("TotalVoteReceived") or 0)
-        status = str(row.get("E_STATUS") or "").strip()
+        status = str(row.get("Remarks") or "").strip()
         if status in ("0", "-"):
             status = ""
         updates[source_id] = (votes, status)

@@ -32,6 +32,7 @@ class CandidateListSerializer(BilingualMixin, serializers.ModelSerializer[Candid
             "party",
             "constituency",
             "votes_received",
+            "status",
             "photo_url",
         ]
 

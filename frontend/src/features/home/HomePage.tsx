@@ -84,7 +84,11 @@ export default function HomePage() {
                   {isNe ? p.party_name_ne : p.party_name}
                 </span>
                 <span className="font-semibold tabular-nums text-ink-800 dark:text-ink-100">
-                  {p.seats_won} {isNe ? 'सिट' : 'seats'}
+                  <span className="text-green-600 dark:text-green-400">{p.seats_won}</span>
+                  {p.seats_leading > 0 && (
+                    <span className="text-amber-600 dark:text-amber-400">+{p.seats_leading}</span>
+                  )}
+                  {' '}{isNe ? 'सिट' : 'seats'}
                 </span>
               </div>
             ))}

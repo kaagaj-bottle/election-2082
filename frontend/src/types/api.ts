@@ -87,6 +87,7 @@ export interface CandidateListItem {
   party: Party;
   constituency: Constituency | null;
   votes_received: number;
+  status: string;
   photo_url: string | null;
 }
 
@@ -159,6 +160,8 @@ export interface PartyTally {
   party_name_ne: string;
   party_name: string;
   seats_won: number;
+  seats_leading: number;
+  total_seats: number;
   total_votes: number;
   candidate_count: number;
 }
