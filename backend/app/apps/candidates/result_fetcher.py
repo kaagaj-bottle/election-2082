@@ -7,7 +7,6 @@ Only updates votes_received and status — never touches candidate identity fiel
 
 import json
 import logging
-import os
 import re
 import time
 import urllib.request
@@ -187,15 +186,13 @@ def _update_candidates(data: list[dict[str, Any]], election: Election) -> int:
 
 def _notify_discord(result: FetchResult) -> None:
     """Send a Discord webhook notification after a successful fetch."""
-    webhook_url = os.environ.get(
-        "DISCORD_WEBHOOK_URL",
-        "https://discord.com/api/webhooks/1479408561338449950/mZW_c6ihgJZtM9YEacPmROiwlQVaKMWt_YDEYJB6dIpq32hoAyDOViU12OveXBElYHJB",
-    )
-    if not webhook_url:
-        return
+    from django.conf import settings
+
+    webhook_url = "https://discord.com/api/webhooks/1479408561338449950/mZW_c6ihgJZtM9YEacPmROiwlQVaKMWt_YDEYJB6dIpq32hoAyDOViU12OveXBElYHJB"
     try:
+        env_label = "DEV" if settings.DEBUG else "PRODUCTION"
         msg = (
-            f"**Election Results Updated**\n"
+            f"**[{env_label}] Election Results Updated**\n"
             f"Records fetched: {result.records_fetched}\n"
             f"Candidates updated: {result.candidates_updated}\n"
             f"Duration: {result.duration_seconds:.1f}s"
