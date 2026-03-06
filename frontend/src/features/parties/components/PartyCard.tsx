@@ -1,25 +1,27 @@
 import { Link } from 'react-router-dom';
-import type { Party } from '@/types/api';
+import type { Party, PartyTally } from '@/types/api';
 import { Card } from '@/components/ui/Card';
 import { useLang } from '@/contexts/language-context';
 import { PartySymbol } from '@/components/shared/PartySymbol';
 
 interface PartyCardProps {
   party: Party;
+  tally?: PartyTally;
 }
 
-export function PartyCard({ party }: PartyCardProps) {
+export function PartyCard({ party, tally }: PartyCardProps) {
   const { lang } = useLang();
   const isNe = lang === 'ne';
   const primary = isNe ? party.name_ne : party.name;
   const secondary = isNe ? party.name : party.name_ne;
 
   return (
-    <Link to={`/candidates?party=${party.id}`}>
+    <Link to={`/candidates?party=${party.id}`} className="group">
       <Card className="transition-shadow hover:shadow-md">
         <div className="flex items-center gap-3">
           <PartySymbol symbolImage={party.symbol_image} size="xl" />
           <div className="min-w-0 flex-1">
+
             <h3
               className={`text-base font-semibold text-ink-800 dark:text-ink-100 ${isNe ? 'font-nepali' : ''}`}
             >
@@ -32,7 +34,23 @@ export function PartyCard({ party }: PartyCardProps) {
                 {secondary}
               </p>
             )}
+            {tally && (
+              <div className="mt-2 flex gap-3 text-xs">
+                <span className="text-green-600 dark:text-green-400">{isNe ? 'जित' : 'Won'}: {tally.seats_won}</span>
+                <span className="text-amber-600 dark:text-amber-400">{isNe ? 'अग्रणी' : 'Leading'}: {tally.seats_leading}</span>
+                <span className="text-ink-500 dark:text-ink-400">{tally.total_votes.toLocaleString()} {isNe ? 'मत' : 'votes'}</span>
+              </div>
+            )}
           </div>
+          <svg
+            className="h-5 w-5 flex-shrink-0 text-ink-400 transition-transform group-hover:translate-x-0.5 dark:text-ink-500"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+          </svg>
         </div>
       </Card>
     </Link>
