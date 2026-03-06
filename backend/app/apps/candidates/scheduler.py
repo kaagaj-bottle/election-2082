@@ -4,7 +4,8 @@ import time
 
 logger = logging.getLogger(__name__)
 
-FETCH_INTERVAL = 60  # seconds
+FETCH_INTERVAL = 300  # 5 minutes after success
+RETRY_DELAY = 30  # seconds between retries on failure
 _started = False
 _lock = threading.Lock()
 
@@ -22,11 +23,13 @@ def _run_loop() -> None:
             result = fetch_live_results("hor-2082")
             if result.success:
                 logger.info("Scheduled fetch OK: %d updated", result.candidates_updated)
+                time.sleep(FETCH_INTERVAL)
             else:
-                logger.warning("Scheduled fetch failed: %s", result.error_message)
+                logger.warning("Scheduled fetch failed: %s — retrying in %ds", result.error_message, RETRY_DELAY)
+                time.sleep(RETRY_DELAY)
         except Exception:
-            logger.exception("Scheduled fetch crashed")
-        time.sleep(FETCH_INTERVAL)
+            logger.exception("Scheduled fetch crashed — retrying in %ds", RETRY_DELAY)
+            time.sleep(RETRY_DELAY)
 
 
 def start_result_scheduler() -> None:

@@ -5,7 +5,6 @@ Uses the official JSON data at result.election.gov.np with multi-URL fallback.
 Only updates votes_received and status — never touches candidate identity fields.
 """
 
-import http.cookiejar
 import json
 import logging
 import os
@@ -16,6 +15,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
+from curl_cffi.requests import Session
 from django.db import transaction
 
 from app.apps.candidates.models import Candidate, ElectionType, ResultFetchLog
@@ -25,10 +25,7 @@ logger = logging.getLogger(__name__)
 
 BASE_URL = "https://result.election.gov.np"
 
-# URL strategies — tried in order (direct first, then CSRF handler)
 _URL_PATHS = [
-    "/JSONFiles/ElectionResultCentral2082.txt",
-    "/JSONFiles/Election2082/ElectionResultCentral2082.txt",
     "/Handlers/SecureJson.ashx?file=JSONFiles/ElectionResultCentral2082.txt",
     "/Handlers/SecureJson.ashx?file=JSONFiles/Election2082/ElectionResultCentral2082.txt",
 ]
@@ -39,17 +36,8 @@ _SESSION_PAGES = [
     "/MapElectionResult2082.aspx",
 ]
 
-_USER_AGENT = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-)
-
 # Minimum number of records expected — safety check against partial/corrupt data
 MIN_EXPECTED_RECORDS = 100
-
-# Retry config
-_MAX_RETRIES = 1
-_RETRY_DELAY_SECONDS = 5
 
 
 @dataclass
@@ -103,43 +91,23 @@ def _notify_discord(result: FetchResult) -> None:
         logger.warning("Discord notification failed", exc_info=True)
 
 
-def _build_opener() -> tuple[urllib.request.OpenerDirector, http.cookiejar.CookieJar]:
-    """Create a urllib opener that handles cookies automatically."""
-    cookie_jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(
-        urllib.request.HTTPCookieProcessor(cookie_jar)
-    )
-    return opener, cookie_jar
+def _build_session() -> Session:  # type: ignore[type-arg]
+    """Create a curl_cffi session with Chrome TLS impersonation."""
+    return Session(impersonate="chrome")
 
 
-
-def _establish_session(
-    opener: urllib.request.OpenerDirector,
-    cookie_jar: http.cookiejar.CookieJar,
-) -> str | None:
+def _establish_session(session: Session) -> str | None:  # type: ignore[type-arg]
     """Try session pages to establish cookies and extract CSRF token."""
-    headers = {
-        "User-Agent": _USER_AGENT,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1",
-    }
-
     html = ""
     for page in _SESSION_PAGES:
         url = BASE_URL + page
-        req = urllib.request.Request(url, headers=headers)
         try:
-            with opener.open(req, timeout=30) as resp:
-                html = resp.read().decode("utf-8", errors="replace")
-            logger.debug("Session established via %s", page)
-            break
-        except urllib.error.HTTPError as e:
-            logger.warning("Session page %s failed: HTTP %d", page, e.code)
+            resp = session.get(url, timeout=30)
+            if resp.status_code == 200:
+                html = resp.text
+                logger.debug("Session established via %s", page)
+                break
+            logger.warning("Session page %s failed: HTTP %d", page, resp.status_code)
         except Exception:
             logger.warning("Session page %s failed", page, exc_info=True)
 
@@ -147,11 +115,11 @@ def _establish_session(
         logger.warning("All session pages failed — proceeding without session")
         return None
 
-    # Try extracting token from cookies first (ASP.NET anti-forgery)
-    for cookie in cookie_jar:
-        if "verification" in cookie.name.lower() or "antiforgery" in cookie.name.lower():
-            logger.debug("Found CSRF token in cookie: %s", cookie.name)
-            return cookie.value
+    # Try extracting token from CsrfToken cookie
+    val = session.cookies.get("CsrfToken")
+    if val:
+        logger.debug("Found CSRF token in CsrfToken cookie")
+        return val
 
     # Fall back to HTML patterns
     patterns = [
@@ -166,75 +134,60 @@ def _establish_session(
             logger.debug("Found CSRF token via pattern: %s", pattern[:40])
             return match.group(1)
 
+    # Last resort: fetch Common.js
+    try:
+        resp = session.get(BASE_URL + "/JSLibrary/Common.js", timeout=30)
+        js_text = resp.text
+        for pattern in patterns:
+            match = re.search(pattern, js_text, re.IGNORECASE)
+            if match:
+                logger.debug("Found CSRF token in Common.js")
+                return match.group(1)
+    except Exception:
+        logger.warning("Could not fetch Common.js", exc_info=True)
+
     logger.debug("No CSRF token found — proceeding without one")
     return None
 
 
 def _fetch_json_data() -> list[dict[str, Any]]:
-    """Try each URL strategy with cookie-based session until one succeeds."""
-    opener, cookie_jar = _build_opener()
-    csrf_token = _establish_session(opener, cookie_jar)
+    """Try each URL strategy with curl_cffi session until one succeeds."""
+    session = _build_session()
+    csrf_token = _establish_session(session)
+
+    headers = {
+        "Referer": BASE_URL + "/",
+        "Origin": BASE_URL,
+        "Accept": "application/json, text/plain, */*",
+        "X-Requested-With": "XMLHttpRequest",
+    }
+    if csrf_token:
+        headers["X-CSRF-Token"] = csrf_token
+        headers["__RequestVerificationToken"] = csrf_token
 
     last_error: Exception | None = None
 
     for url_path in _URL_PATHS:
         url = f"{BASE_URL}{url_path}"
-        headers = {
-            "User-Agent": _USER_AGENT,
-            "Referer": BASE_URL + "/",
-            "Origin": BASE_URL,
-            "Accept": "application/json, text/plain, */*",
-            "X-Requested-With": "XMLHttpRequest",
-            "Sec-Fetch-Site": "same-origin",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Dest": "empty",
-        }
-        if csrf_token:
-            headers["X-CSRF-Token"] = csrf_token
-            headers["__RequestVerificationToken"] = csrf_token
+        try:
+            resp = session.get(url, headers=headers, timeout=180)
+            resp.raise_for_status()
+            raw = resp.content.decode("utf-8-sig")
 
-        for attempt in range(_MAX_RETRIES + 1):
-            try:
-                req = urllib.request.Request(url, headers=headers)
-                with opener.open(req, timeout=60) as resp:
-                    raw = resp.read().decode("utf-8-sig")
+            data = json.loads(raw)
+            if isinstance(data, dict) and "data" in data:
+                data = data["data"]
+            if not isinstance(data, list):
+                raise ValueError(f"Expected list, got {type(data).__name__}")
 
-                data = json.loads(raw)
-                if isinstance(data, dict) and "data" in data:
-                    data = data["data"]
-                if not isinstance(data, list):
-                    raise ValueError(f"Expected list, got {type(data).__name__}")
+            logger.info("Successfully fetched %d records from %s", len(data), url_path)
+            return data
 
-                logger.info("Successfully fetched %d records from %s", len(data), url_path)
-                return data
+        except Exception as e:
+            last_error = e
+            logger.warning("URL %s failed: %s: %s", url_path, type(e).__name__, e)
 
-            except urllib.error.HTTPError as e:
-                last_error = e
-                body_preview = ""
-                if e.code == 403:
-                    try:
-                        body_preview = e.read().decode("utf-8", errors="replace")[:200]
-                    except Exception:
-                        body_preview = "(could not read response body)"
-                logger.warning(
-                    "URL %s failed (attempt %d/%d): HTTP %d%s",
-                    url_path, attempt + 1, _MAX_RETRIES + 1, e.code,
-                    f" — body: {body_preview}" if body_preview else "",
-                )
-            except Exception as e:
-                last_error = e
-                logger.warning(
-                    "URL %s failed (attempt %d/%d): %s: %s",
-                    url_path, attempt + 1, _MAX_RETRIES + 1,
-                    type(e).__name__, e,
-                )
-
-            if attempt < _MAX_RETRIES:
-                time.sleep(_RETRY_DELAY_SECONDS)
-
-    raise RuntimeError(
-        f"All URL strategies failed. Last error: {last_error}"
-    )
+    raise RuntimeError(f"All URL strategies failed. Last error: {last_error}")
 
 
 def _update_candidates(data: list[dict[str, Any]], election: Election) -> int:
