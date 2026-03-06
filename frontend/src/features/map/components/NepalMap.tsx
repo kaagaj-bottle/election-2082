@@ -133,7 +133,7 @@ export function NepalMap({
   const bgColor = isDark ? '#0f172a' : '#f1f5f9'; // slate-950 / slate-100
 
   return (
-    <div className="relative">
+    <div className="relative isolate">
       <MapContainer
         center={NEPAL_CENTER}
         zoom={NEPAL_ZOOM}
