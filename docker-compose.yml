@@ -25,6 +25,7 @@ services:
       DB_HOST: db
       DB_PORT: "5432"
       DJANGO_SETTINGS_MODULE: app.settings.prod
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
     ports:
       - "127.0.0.1:8000:8000"
 
