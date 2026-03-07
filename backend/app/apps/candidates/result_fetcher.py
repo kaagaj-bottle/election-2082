@@ -17,7 +17,6 @@ from app.apps.candidates.fetch_helpers import (
     FetchResult,
     build_session,
     establish_session,
-    notify_discord,
 )
 from app.apps.candidates.models import Candidate, ElectionType, ResultFetchLog
 from app.apps.elections.models import Election
@@ -160,7 +159,6 @@ def fetch_live_results(election_slug: str = "hor-2082") -> FetchResult:
             candidates_updated=candidates_updated,
             duration_seconds=duration,
         )
-        notify_discord(result, label="FPTP Results")
         return result
 
     except Exception as e:

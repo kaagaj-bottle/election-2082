@@ -14,7 +14,6 @@ from app.apps.candidates.fetch_helpers import (
     FetchResult,
     build_session,
     establish_session,
-    notify_discord,
 )
 from app.apps.candidates.models import ResultFetchLog
 from app.apps.parties.models import Party
@@ -101,7 +100,6 @@ def fetch_pr_results() -> FetchResult:
             candidates_updated=parties_updated,
             duration_seconds=duration,
         )
-        notify_discord(result, label="PR Party Votes")
         return result
 
     except Exception as e:

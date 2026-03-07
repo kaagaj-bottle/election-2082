@@ -3,7 +3,6 @@
 import json
 import re
 import time
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -158,26 +157,6 @@ def _write_results(parsed: dict[str, object]) -> None:
     print(f"[{_ts()}] Wrote {RESULTS_FILE.name} ({RESULTS_FILE.stat().st_size} bytes)")
 
 
-def _notify_discord(size: int, json_count: int) -> None:
-    """Send a Discord webhook notification on success."""
-    webhook_url = "https://discord.com/api/webhooks/1479327080641597462/StNAXgzu-VgrZjHjBbJB_hYCgf0OnPUlaDmPqANmgopbZj_9fYOM7vK1CXhC6f0eVTUW"
-    if not webhook_url:
-        return
-    try:
-        msg = f"poll site data fetched ({size} bytes, {json_count}/{len(JSON_FILES)} JSON files)"
-        payload = json.dumps({"content": msg}).encode("utf-8")
-        req = urllib.request.Request(
-            webhook_url,
-            data=payload,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10):
-            pass
-    except Exception as e:
-        print(f"[{_ts()}] Discord notification failed: {e}")
-
-
 def main() -> None:
     session = _build_session()
     print(f"[{_ts()}] Polling {URL} ...")
@@ -206,7 +185,6 @@ def main() -> None:
                 if parsed:
                     _write_results(parsed)
 
-                _notify_discord(len(body), json_count)
                 return
             print(f"[{_ts()}] {status} - retrying...")
         except (OSError, ConnectionError) as e:

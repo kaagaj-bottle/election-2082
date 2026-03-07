@@ -1,9 +1,7 @@
 """Shared helpers for election result fetchers."""
 
-import json
 import logging
 import re
-import urllib.request
 from dataclasses import dataclass
 
 from curl_cffi.requests import Session
@@ -82,35 +80,3 @@ def establish_session(session: Session) -> str | None:  # type: ignore[type-arg]
 
     logger.debug("No CSRF token found — proceeding without one")
     return None
-
-
-def notify_discord(result: FetchResult, label: str = "Election Results") -> None:
-    """Send a Discord webhook notification after a successful fetch."""
-    from django.conf import settings
-
-    webhook_url = "https://discord.com/api/webhooks/1479408561338449950/mZW_c6ihgJZtM9YEacPmROiwlQVaKMWt_YDEYJB6dIpq32hoAyDOViU12OveXBElYHJB"
-    try:
-        env_label = "DEV" if settings.DEBUG else "PRODUCTION"
-        msg = f"**[{env_label}] {label} Updated**\n"
-        if result.records_fetched:
-            msg += f"Records fetched: {result.records_fetched}\n"
-        if result.candidates_updated:
-            msg += f"Candidates updated: {result.candidates_updated}\n"
-        if result.parties_updated:
-            msg += f"Parties updated: {result.parties_updated}\n"
-        msg += f"Duration: {result.duration_seconds:.1f}s"
-        payload = json.dumps({"content": msg}).encode("utf-8")
-        req = urllib.request.Request(
-            webhook_url,
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "User-Agent": "Election2082-Bot",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=10):
-            pass
-        logger.info("Discord notification sent")
-    except Exception:
-        logger.warning("Discord notification failed", exc_info=True)
