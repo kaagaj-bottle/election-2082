@@ -15,7 +15,6 @@ const links = [
   { to: '/geography', label: 'Geography', labelNe: 'भूगोल' },
   { to: '/stats', label: 'Stats', labelNe: 'तथ्याङ्क' },
   { to: '/guidelines', label: 'Guidelines', labelNe: 'निर्देशिका' },
-  { to: '/news', label: 'News', labelNe: 'समाचार' },
   { to: '/hotseats', label: 'Hot Seats', labelNe: 'चर्चित सिट' },
   { to: '/map', label: 'Map', labelNe: 'नक्सा' },
 ];

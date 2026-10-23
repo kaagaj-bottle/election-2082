@@ -12,7 +12,6 @@ const StatsPage = lazy(() => import('@/features/stats/StatsPage'));
 const GuidelinesPage = lazy(() => import('@/features/guidelines/GuidelinesPage'));
 const ResultsPage = lazy(() => import('@/features/results/ResultsPage'));
 const ProvinceResultsPage = lazy(() => import('@/features/results/ProvinceResultsPage'));
-const NewsPage = lazy(() => import('@/features/news/NewsPage'));
 const MapPage = lazy(() => import('@/features/map/MapPage'));
 const HotSeatsPage = lazy(() => import('@/features/hotseats/HotSeatsPage'));
 
@@ -101,14 +100,6 @@ export const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <GuidelinesPage />
-          </SuspenseWrapper>
-        ),
-      },
-      {
-        path: '/news',
-        element: (
-          <SuspenseWrapper>
-            <NewsPage />
           </SuspenseWrapper>
         ),
       },

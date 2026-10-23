@@ -12,7 +12,6 @@ const mainLinks = [
   { to: '/results', label: 'Results', labelNe: 'नतिजा' },
   { to: '/candidates', label: 'Candidates', labelNe: 'उम्मेदवार' },
   { to: '/parties', label: 'Parties', labelNe: 'दल' },
-  { to: '/news', label: 'News', labelNe: 'समाचार' },
   { to: '/hotseats', label: 'Hot Seats', labelNe: 'चर्चित सिट' },
   { to: '/map', label: 'Map', labelNe: 'नक्सा' },
 ];
