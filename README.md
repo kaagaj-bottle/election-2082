@@ -75,25 +75,8 @@ PGPASSWORD=postgres psql -U postgres -h localhost -c "CREATE DATABASE election_2
 # Run migrations
 uv run python manage.py migrate
 
-# Create the election record
-uv run python manage.py shell -c "
-from app.apps.elections.models import Election
-from datetime import date
-Election.objects.get_or_create(
-    slug='hor-2082',
-    defaults={
-        'name': 'House of Representatives Election 2082',
-        'name_ne': 'प्रतिनिधि सभा निर्वाचन २०८२',
-        'election_date': date(2026, 3, 5),
-        'total_seats_fptp': 165,
-        'total_seats_pr': 110,
-        'is_active': True,
-    }
-)
-"
-
-# Import FPTP candidate data
-uv run python manage.py import_fptp ../election_result_2082.json --election hor-2082
+# Load the bundled election dataset (fixtures/election_data.json.gz)
+uv run python manage.py seed_data
 
 # Start the dev server
 uv run python manage.py runserver
@@ -183,20 +166,7 @@ FPTP candidate data is sourced from the [Nepal Election Commission](https://resu
 
 **Backend**: Deploy with Docker on a VPS. Copy `.env.example` to `.env`, configure your values, and run `docker-compose up -d`. Use the provided `nginx/election-api.conf` to proxy `/api/` to the backend container.
 
-To import election data (one-time setup or data update):
-
-```bash
-cd /path/to/election-2082
-
-# Copy data file into the container
-docker compose cp election_result_2082.json web:/tmp/election_result_2082.json
-
-# Run the import command
-docker compose exec web python manage.py import_fptp /tmp/election_result_2082.json --election hor-2082
-
-# Import actual English names (from bundled ekantipur data)
-docker compose exec web python manage.py import_english_data
-```
+On start, the container runs migrations and then `seed_data`, which loads `backend/fixtures/election_data.json.gz` (final results, PR votes, English data) into an empty database. It is a no-op if data already exists; use `python manage.py seed_data --force` to reload.
 
 ## License
 
