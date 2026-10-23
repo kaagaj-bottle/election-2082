@@ -54,18 +54,16 @@ def _fetch_pr_json_data() -> list[dict[str, Any]]:
 
 
 def _update_parties(data: list[dict[str, Any]]) -> int:
-    """Update pr_votes_received for existing parties matched by name_ne."""
+    """Update pr_votes_received, creating PR-only parties (incl. joint-symbol entries) as needed."""
     updated_count = 0
     for row in data:
         party_name = str(row.get("PoliticalPartyName") or "").strip()
         votes = int(row.get("TotalVoteReceived") or 0)
         if not party_name:
             continue
-        try:
-            party = Party.objects.get(name_ne=party_name)
-        except Party.DoesNotExist:
-            logger.warning("PR result: no party found for '%s'", party_name)
-            continue
+        party, created = Party.objects.get_or_create(name_ne=party_name)
+        if created:
+            logger.info("PR result: created party '%s'", party_name)
         if party.pr_votes_received != votes:
             party.pr_votes_received = votes
             party.save(update_fields=["pr_votes_received"])
