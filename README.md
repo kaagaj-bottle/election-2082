@@ -11,7 +11,7 @@ Bilingual (Nepali/English) web application for browsing Nepal's House of Represe
 | Frontend | React 19, TypeScript, Vite, TailwindCSS, React Router v7 |
 | Backend | Django 5.1, Django REST Framework, drf-spectacular |
 | Database | PostgreSQL 16 with pg_trgm for trigram search |
-| Deployment | Docker Compose, Nginx (VPS) / Vercel (frontend) |
+| Deployment | Docker Compose, Nginx (VPS) |
 
 ## Features
 
@@ -45,7 +45,6 @@ election-2082/
 │   │   ├── hooks/           # useApi, useCursorPagination, useFilters
 │   │   ├── contexts/        # Theme, Language
 │   │   └── types/           # API types
-│   ├── vercel.json
 │   └── package.json
 ├── nginx/                   # Nginx proxy config for VPS
 ├── docker-compose.yml
@@ -161,8 +160,6 @@ npm run format
 FPTP candidate data is sourced from the [Nepal Election Commission](https://result.election.gov.np) official JSON feed. Candidate photos are served from `result.election.gov.np/Images/Candidate/{id}.jpg`. See [CANDIDATE_DATA_SOURCES.md](CANDIDATE_DATA_SOURCES.md) for the full data sourcing documentation.
 
 ## Deployment
-
-**Frontend**: Deploy to Vercel. Set `VITE_API_BASE_URL` to your backend URL.
 
 **Backend**: Deploy with Docker on a VPS. Copy `.env.example` to `.env`, configure your values, and run `docker-compose up -d`. Use the provided `nginx/election-api.conf` to proxy `/api/` to the backend container.
 
