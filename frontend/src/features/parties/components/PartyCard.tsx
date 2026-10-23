@@ -49,7 +49,7 @@ export function PartyCard({ party, tally }: PartyCardProps) {
             </div>
           </div>
           <svg
-            className="h-5 w-5 flex-shrink-0 text-ink-400 transition-transform group-hover:translate-x-0.5 dark:text-ink-500"
+            className="h-5 w-5 shrink-0 text-ink-400 transition-transform group-hover:translate-x-0.5 dark:text-ink-500"
             fill="none"
             viewBox="0 0 24 24"
             strokeWidth={2}

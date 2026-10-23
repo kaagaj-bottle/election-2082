@@ -171,7 +171,7 @@ export function NepalMap({
       </MapContainer>
 
       {/* Legend overlay */}
-      <div className="absolute bottom-4 left-4 z-[1000]">
+      <div className="absolute bottom-4 left-4 z-1000">
         <MapLegend entries={legendEntries} isNe={isNe} />
       </div>
     </div>

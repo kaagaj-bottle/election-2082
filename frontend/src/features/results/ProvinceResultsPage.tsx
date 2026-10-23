@@ -102,7 +102,7 @@ export default function ProvinceResultsPage() {
             value={districtSearch}
             onChange={(e) => setDistrictSearch(e.target.value)}
             placeholder={isNe ? 'जिल्ला खोज्नुहोस्...' : 'Search district...'}
-            className="w-full rounded border border-surface-300 bg-white py-2 pl-9 pr-3 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500 sm:max-w-xs"
+            className="w-full rounded border border-surface-300 bg-white py-2 pl-9 pr-3 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-hidden focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500 sm:max-w-xs"
           />
         </div>
       )}

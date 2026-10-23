@@ -15,7 +15,7 @@ export function MapLegend({ entries, isNe }: MapLegendProps) {
   if (entries.length === 0) return null;
 
   return (
-    <div className="rounded-lg border border-surface-200 bg-white/95 p-3 shadow-md backdrop-blur dark:border-surface-700 dark:bg-surface-900/95">
+    <div className="rounded-lg border border-surface-200 bg-white/95 p-3 shadow-md backdrop-blur-sm dark:border-surface-700 dark:bg-surface-900/95">
       <div className="mb-2 text-xs font-semibold text-ink-600 dark:text-ink-300">
         {isNe ? 'अग्रणी दल' : 'Leading Party'}
       </div>
@@ -23,7 +23,7 @@ export function MapLegend({ entries, isNe }: MapLegendProps) {
         {entries.map((e) => (
           <div key={e.party} className="flex items-center gap-2 text-xs">
             <span
-              className="inline-block h-3 w-3 shrink-0 rounded-sm"
+              className="inline-block h-3 w-3 shrink-0 rounded-xs"
               style={{ backgroundColor: e.color }}
             />
             <span className="text-ink-700 dark:text-ink-300">{e.party}</span>

@@ -189,7 +189,7 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
               placeholder={isNe ? 'न्यूनतम' : 'Min'}
               value={filters.age_min ?? ''}
               onChange={(e) => setFilter('age_min', e.target.value || undefined)}
-              className="w-full rounded border border-surface-300 bg-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500"
+              className="w-full rounded border border-surface-300 bg-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-hidden focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500"
             />
             <input
               type="number"
@@ -198,7 +198,7 @@ export function CandidateFilters({ filters, setFilter, clearFilters }: Candidate
               placeholder={isNe ? 'अधिकतम' : 'Max'}
               value={filters.age_max ?? ''}
               onChange={(e) => setFilter('age_max', e.target.value || undefined)}
-              className="w-full rounded border border-surface-300 bg-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500"
+              className="w-full rounded border border-surface-300 bg-white px-3 py-2 text-sm text-ink-800 placeholder:text-ink-400 focus:border-primary-500 focus:outline-hidden focus:ring-1 focus:ring-primary-500 dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100 dark:placeholder:text-ink-500"
             />
           </div>
         </div>

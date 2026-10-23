@@ -1,19 +1,85 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-/* Leaflet tooltip overrides */
-.map-tooltip {
-  @apply rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm shadow-lg dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100;
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-surface-50: #faf9f7;
+  --color-surface-100: #f5f3f0;
+  --color-surface-200: #eae7e1;
+  --color-surface-300: #ddd9d1;
+  --color-surface-700: #3d3a35;
+  --color-surface-800: #2f2d29;
+  --color-surface-900: #25231f;
+  --color-surface-950: #1a1917;
+
+  --color-ink-50: #f5f4f3;
+  --color-ink-100: #d8d6d3;
+  --color-ink-200: #b5b1ac;
+  --color-ink-300: #918c85;
+  --color-ink-400: #706b63;
+  --color-ink-500: #565148;
+  --color-ink-600: #443f38;
+  --color-ink-700: #35312b;
+  --color-ink-800: #2d2b28;
+  --color-ink-900: #1f1e1b;
+
+  --color-pastel-blue: #93b5e1;
+  --color-pastel-indigo: #a5a5e0;
+  --color-pastel-violet: #bfa5e0;
+  --color-pastel-rose: #e0a5b8;
+  --color-pastel-amber: #e0c9a5;
+  --color-pastel-green: #a5d4b8;
+  --color-pastel-teal: #a5d4d4;
+
+  --color-primary-50: #f0f4fa;
+  --color-primary-100: #dce5f4;
+  --color-primary-200: #b8cce9;
+  --color-primary-300: #93b5e1;
+  --color-primary-400: #6e9ad5;
+  --color-primary-500: #4a7fc9;
+  --color-primary-600: #3b66a1;
+  --color-primary-700: #2c4c79;
+  --color-primary-800: #1e3351;
+  --color-primary-900: #0f1928;
+
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-nepali: 'Noto Sans Devanagari', sans-serif;
+
+  --radius: 0.5rem;
 }
 
-.map-tooltip::before {
-  display: none;
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
-/* Hide leaflet default attribution */
-.leaflet-control-attribution {
-  display: none !important;
+@layer utilities {
+  /* Leaflet tooltip overrides */
+  .map-tooltip {
+    @apply rounded-lg border border-surface-200 bg-white px-3 py-2 text-sm shadow-lg dark:border-surface-700 dark:bg-surface-900 dark:text-ink-100;
+  }
+
+  .map-tooltip::before {
+    display: none;
+  }
+
+  /* Hide leaflet default attribution */
+  .leaflet-control-attribution {
+    display: none !important;
+  }
 }
 
 @layer base {
