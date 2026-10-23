@@ -41,18 +41,6 @@ export const CONSTITUENCY_SELECTED_STYLE: PathOptions = {
   fillOpacity: 0.4,
 };
 
-// Dark mode variants
-export const DISTRICT_STYLE_DARK: PathOptions = {
-  ...DISTRICT_STYLE,
-  color: '#94a3b8', // slate-400
-};
-
-export const CONSTITUENCY_STYLE_DARK: PathOptions = {
-  ...CONSTITUENCY_STYLE,
-  color: '#64748b', // slate-500
-  fillColor: '#334155', // slate-700
-};
-
 // Map party names to colors for constituency fills
 const PARTY_COLORS: Record<string, string> = {
   'Nepali Congress': '#e11d48', // rose-600

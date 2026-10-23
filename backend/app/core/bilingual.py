@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from rest_framework.serializers import Serializer
 
 
 class BilingualMixin:
@@ -57,14 +56,3 @@ class BilingualMixin:
                 new_data[canonical] = data[source_field]
 
         return new_data
-
-
-def get_lang_from_context(serializer: Serializer) -> str | None:  # type: ignore[type-arg]
-    """Extract the lang parameter from serializer context."""
-    request = serializer.context.get("request")
-    if not request:
-        return None
-    lang = request.query_params.get("lang")
-    if lang in ("en", "ne"):
-        return lang
-    return None

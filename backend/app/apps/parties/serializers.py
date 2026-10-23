@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from django.db.models import Count
 from rest_framework import serializers
 
 from app.apps.parties.models import Party
@@ -26,7 +25,3 @@ class PartyDetailSerializer(BilingualMixin, serializers.ModelSerializer[Party]):
     class Meta:
         model = Party
         fields = ["id", "name_ne", "name", "symbol_image", "pr_votes_received", "candidate_count"]
-
-    @staticmethod
-    def setup_eager_loading(queryset):  # type: ignore[no-untyped-def]
-        return queryset.annotate(candidate_count=Count("candidates"))
