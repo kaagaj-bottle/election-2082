@@ -10,12 +10,6 @@ attrs==25.4.0
     #   referencing
 brotli==1.2.0
     # via whitenoise
-certifi==2026.2.25
-    # via curl-cffi
-cffi==2.0.0
-    # via curl-cffi
-curl-cffi==0.14.0
-    # via election-backend (pyproject.toml)
 django==5.1.15
     # via
     #   election-backend (pyproject.toml)
@@ -47,8 +41,6 @@ psycopg==3.3.2
     # via election-backend (pyproject.toml)
 psycopg-binary==3.3.2
     # via psycopg
-pycparser==3.0
-    # via cffi
 pyyaml==6.0.3
     # via drf-spectacular
 referencing==0.37.0
@@ -61,14 +53,6 @@ rpds-py==0.30.0
     #   referencing
 sqlparse==0.5.5
     # via django
-typing-extensions==4.15.0
-    # via
-    #   psycopg
-    #   referencing
-tzdata==2025.3
-    # via
-    #   django
-    #   psycopg
 uritemplate==4.2.0
     # via drf-spectacular
 whitenoise==6.11.0
